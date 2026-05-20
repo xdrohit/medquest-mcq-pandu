@@ -8,25 +8,23 @@ export async function GET(req: Request) {
   try {
     await dbConnect();
     const { searchParams } = new URL(req.url);
-    const all = searchParams.get('all'); // admin passes ?all=true
-
-    const query = all === 'true' ? {} : { active: true };
+    const all = searchParams.get('all');
+    const query = all === 'true' ? {} : { status: 'published', active: true };
     const exams = await Exam.find(query).sort({ createdAt: -1 });
 
-    // Attach question count per exam
     const examsWithCount = await Promise.all(
       exams.map(async (exam) => {
         const count = await Question.countDocuments({ examId: exam._id });
         return { ...exam.toObject(), questionCount: count };
       })
     );
-
     return NextResponse.json(examsWithCount, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
+// POST create a new exam
 export async function POST(req: Request) {
   try {
     await dbConnect();
@@ -38,19 +36,20 @@ export async function POST(req: Request) {
   }
 }
 
-// PUT update exam (toggle active, edit details)
+// PUT update exam
 export async function PUT(req: Request) {
   try {
     await dbConnect();
     const { id, ...data } = await req.json();
     const exam = await Exam.findByIdAndUpdate(id, data, { new: true });
+    if (!exam) return NextResponse.json({ message: 'Exam not found' }, { status: 404 });
     return NextResponse.json(exam, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
-// DELETE exam (and its questions)
+// DELETE exam and its questions
 export async function DELETE(req: Request) {
   try {
     await dbConnect();
