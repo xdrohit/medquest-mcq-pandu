@@ -23,14 +23,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Role-based security check for hidden admin route
-    // If logging in via standard /login, block admins.
-    // If logging in via secret route, block students.
+    // If logging in via hidden admin route, block students.
     if (isHiddenAdminRoute && user.role !== 'admin') {
       return NextResponse.json({ message: 'Access denied.' }, { status: 403 });
-    }
-    if (!isHiddenAdminRoute && user.role === 'admin') {
-      return NextResponse.json({ message: 'Admins must use the secure portal.' }, { status: 403 });
     }
 
     // Check password
