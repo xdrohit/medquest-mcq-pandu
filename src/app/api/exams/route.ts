@@ -9,7 +9,8 @@ export async function GET(req: Request) {
     await dbConnect();
     const { searchParams } = new URL(req.url);
     const all = searchParams.get('all');
-    const query = all === 'true' ? {} : { status: 'published', active: true };
+    // Students see exams that are published OR active (active: true is the main gate)
+    const query = all === 'true' ? {} : { active: true };
     const exams = await Exam.find(query).sort({ createdAt: -1 });
 
     const examsWithCount = await Promise.all(
@@ -29,6 +30,9 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const data = await req.json();
+    // Default: published + active so students can see it immediately
+    if (!data.status) data.status = 'published';
+    if (data.active === undefined) data.active = true;
     const exam = await Exam.create(data);
     return NextResponse.json(exam, { status: 201 });
   } catch (error: any) {

@@ -26,7 +26,7 @@ const emptyForm = {
   passingMarks: 0,
   totalMarks: 100,
   randomQuestionOrder: false,
-  status: "draft",
+  status: "published",
   scheduledAt: "",
   instructions: "",
   tags: "",
