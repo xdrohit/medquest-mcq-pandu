@@ -7,8 +7,9 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export interface GlassCardProps extends HTMLMotionProps<"div"> {
+export interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "children"> {
   hoverEffect?: boolean;
+  children?: React.ReactNode;
 }
 
 export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
