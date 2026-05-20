@@ -2,12 +2,75 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  Users, BookOpen, Activity, TrendingUp, Plus, LogOut,
-  ClipboardList, CreditCard, ChevronRight, Zap, ShieldCheck
+  LayoutDashboard, BookOpen, ClipboardList, Users, CreditCard,
+  LogOut, Activity, ChevronRight, TrendingUp, Plus, Zap,
+  ShieldCheck, Database, Settings
 } from "lucide-react";
-import { Navbar } from "@/components/layout/Navbar";
+
+const navItems = [
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/questions", label: "MCQ Manager", icon: BookOpen },
+  { href: "/admin/tests", label: "Test Management", icon: ClipboardList },
+  { href: "/admin/students", label: "Students", icon: Users },
+  { href: "/admin/payments", label: "Payments", icon: CreditCard },
+];
+
+function AdminSidebar({ onLogout }: { onLogout: () => void }) {
+  const pathname = usePathname();
+  return (
+    <aside className="w-64 h-screen bg-slate-900 border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40">
+      {/* Logo */}
+      <div className="px-6 py-5 border-b border-slate-800">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 flex items-center justify-center shadow-lg shadow-primary-500/30">
+            <Activity className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <span className="text-white font-bold text-lg leading-none">MedQuest</span>
+            <p className="text-xs text-primary-400 font-semibold mt-0.5 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" /> Admin Panel
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p className="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-3">Navigation</p>
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href;
+          return (
+            <Link key={href} href={href}>
+              <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group ${
+                isActive
+                  ? "bg-primary-500/15 text-primary-400 border border-primary-500/20"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+              }`}>
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-primary-400" : "text-slate-500 group-hover:text-slate-300"}`} />
+                {label}
+                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-400" />}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom */}
+      <div className="px-3 py-4 border-t border-slate-800 space-y-1">
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </button>
+      </div>
+    </aside>
+  );
+}
 
 export default function AdminDashboard() {
   const [exams, setExams] = useState<any[]>([]);
@@ -20,9 +83,9 @@ export default function AdminDashboard() {
       fetch("/api/admin/questions").then(r => r.json()),
     ]).then(([examsData, questionsData]) => {
       const examList = Array.isArray(examsData) ? examsData : [];
-      const questionList = Array.isArray(questionsData) ? questionsData : [];
+      const qList = Array.isArray(questionsData) ? questionsData : [];
       setExams(examList);
-      setStats({ totalExams: examList.length, totalQuestions: questionList.length });
+      setStats({ totalExams: examList.length, totalQuestions: qList.length });
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -32,134 +95,154 @@ export default function AdminDashboard() {
     window.location.href = "/";
   };
 
-  const quickActions = [
-    { href: "/admin/questions", icon: <BookOpen className="w-5 h-5" />, label: "MCQ Manager", desc: "Add, edit, bulk upload questions", color: "from-primary-600 to-blue-600" },
-    { href: "/admin/students", icon: <Users className="w-5 h-5" />, label: "Students", desc: "Manage registered students", color: "from-purple-600 to-indigo-600" },
-    { href: "/admin/tests", icon: <ClipboardList className="w-5 h-5" />, label: "Exams", desc: "Create and manage exams", color: "from-amber-600 to-orange-600" },
-    { href: "/admin/payments", icon: <CreditCard className="w-5 h-5" />, label: "Payments", desc: "Track revenue and transactions", color: "from-green-600 to-teal-600" },
+  const statCards = [
+    { label: "Total Exams", value: loading ? "—" : stats.totalExams, sub: "In database", icon: ClipboardList, color: "text-violet-400", ring: "ring-violet-500/20", bg: "from-violet-500/10 to-transparent" },
+    { label: "Total MCQs", value: loading ? "—" : stats.totalQuestions, sub: "Across all exams", icon: BookOpen, color: "text-cyan-400", ring: "ring-cyan-500/20", bg: "from-cyan-500/10 to-transparent" },
+    { label: "Active Students", value: "0", sub: "Registered users", icon: Users, color: "text-emerald-400", ring: "ring-emerald-500/20", bg: "from-emerald-500/10 to-transparent" },
+    { label: "Tests Taken", value: "0", sub: "All time submissions", icon: TrendingUp, color: "text-amber-400", ring: "ring-amber-500/20", bg: "from-amber-500/10 to-transparent" },
   ];
 
-  const statCards = [
-    { label: "Total Exams", value: loading ? "—" : stats.totalExams, icon: <BookOpen className="w-5 h-5" />, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
-    { label: "Total MCQs", value: loading ? "—" : stats.totalQuestions, icon: <ClipboardList className="w-5 h-5" />, color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
-    { label: "Active Students", value: "0", icon: <Users className="w-5 h-5" />, color: "text-green-400", bg: "bg-green-500/10 border-green-500/20" },
-    { label: "Tests Taken", value: "0", icon: <Activity className="w-5 h-5" />, color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
+  const quickActions = [
+    { href: "/admin/questions", label: "Add MCQ", icon: Plus, desc: "Add a new question", color: "bg-primary-500 hover:bg-primary-400" },
+    { href: "/admin/tests", label: "Create Exam", icon: ClipboardList, desc: "Set up a new test", color: "bg-violet-600 hover:bg-violet-500" },
+    { href: "/admin/students", label: "Manage Users", icon: Users, desc: "View all students", color: "bg-emerald-600 hover:bg-emerald-500" },
+    { href: "/api/seed", label: "Seed Database", icon: Database, desc: "Reset sample data", color: "bg-slate-600 hover:bg-slate-500" },
   ];
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <Navbar />
+    <div className="flex min-h-screen bg-slate-950 text-slate-100">
+      <AdminSidebar onLogout={handleLogout} />
 
-      {/* Ambient Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-primary-900/20 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-accent-900/20 rounded-full blur-[120px]" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-8 pt-28 pb-16 relative z-10">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-12">
+      {/* Main Content */}
+      <main className="ml-64 flex-1 p-8 overflow-y-auto">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <ShieldCheck className="w-5 h-5 text-primary-400" />
-              <span className="text-primary-400 text-sm font-semibold uppercase tracking-widest">Admin Control Center</span>
-            </div>
-            <h1 className="text-4xl font-extrabold text-white">MedQuest Dashboard</h1>
-            <p className="text-slate-400 mt-1">Manage your entire medical MCQ platform from here.</p>
+            <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Admin Control Center</p>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/admin/tests">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 text-sm font-medium transition-colors">
+                <ClipboardList className="w-4 h-4" /> New Exam
+              </button>
+            </Link>
             <Link href="/admin/questions">
-              <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold shadow-lg hover:opacity-90 transition-opacity">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-colors shadow-lg shadow-primary-500/20">
                 <Plus className="w-4 h-4" /> Add MCQ
               </button>
             </Link>
-            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:text-red-400 hover:border-red-700 text-sm transition-colors">
-              <LogOut className="w-4 h-4" /> Logout
-            </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-              <div className={`rounded-2xl p-5 border ${stat.bg} backdrop-blur-sm`}>
-                <div className={`${stat.color} mb-3`}>{stat.icon}</div>
+            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+              <div className={`relative overflow-hidden rounded-2xl p-5 bg-slate-900 border border-slate-800 ring-1 ${stat.ring} hover:border-slate-700 transition-colors`}>
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${stat.bg} rounded-full blur-2xl pointer-events-none`} />
+                <div className={`w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center mb-4 ${stat.color}`}>
+                  <stat.icon className="w-4 h-4" />
+                </div>
                 <p className="text-3xl font-black text-white">{stat.value}</p>
-                <p className="text-sm text-slate-400 mt-1">{stat.label}</p>
+                <p className="text-sm font-semibold text-slate-300 mt-0.5">{stat.label}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{stat.sub}</p>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Quick Actions */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-10">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Zap className="w-5 h-5 text-yellow-400" /> Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action, i) => (
-              <Link key={i} href={action.href}>
-                <div className={`group relative rounded-2xl p-6 bg-gradient-to-br ${action.color} bg-opacity-10 border border-white/10 hover:border-white/20 transition-all cursor-pointer overflow-hidden`}>
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative z-10">
-                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      {action.icon}
-                    </div>
-                    <h3 className="text-white font-bold mb-1">{action.label}</h3>
-                    <p className="text-white/60 text-sm">{action.desc}</p>
-                    <ChevronRight className="w-4 h-4 text-white/40 mt-3 group-hover:translate-x-1 transition-transform" />
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="w-4 h-4 text-yellow-400" />
+            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Quick Actions</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {quickActions.map((a, i) => (
+              <Link key={i} href={a.href}>
+                <div className={`group flex items-center gap-3 px-4 py-3.5 rounded-xl ${a.color} transition-colors cursor-pointer`}>
+                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors flex-shrink-0">
+                    <a.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-bold leading-tight">{a.label}</p>
+                    <p className="text-white/60 text-xs truncate">{a.desc}</p>
                   </div>
                 </div>
               </Link>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Recent Exams */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        {/* Exams Table */}
+        <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2"><BookOpen className="w-5 h-5 text-primary-400" /> Exams Overview</h2>
-            <Link href="/admin/tests" className="text-primary-400 hover:text-primary-300 text-sm font-medium transition-colors">View All →</Link>
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-primary-400" />
+              <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Exams Overview</h2>
+            </div>
+            <Link href="/admin/tests" className="text-xs text-primary-400 hover:text-primary-300 font-semibold flex items-center gap-1 transition-colors">
+              View All <ChevronRight className="w-3 h-3" />
+            </Link>
           </div>
+
           <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
             {loading ? (
-              <div className="p-8 text-center text-slate-500">Loading...</div>
-            ) : exams.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">No exams yet. <Link href="/admin/tests" className="text-primary-400">Create one</Link></div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-slate-800 bg-slate-800/30">
-                      <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Exam Title</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Questions</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {exams.slice(0, 5).map((exam: any) => (
-                      <tr key={exam._id} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
-                        <td className="px-6 py-4 font-semibold text-white">{exam.title}</td>
-                        <td className="px-6 py-4"><span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded-lg">{exam.category}</span></td>
-                        <td className="px-6 py-4 text-slate-300">{exam.questionCount ?? "—"}</td>
-                        <td className="px-6 py-4">
-                          <span className={`text-xs px-2 py-1 rounded-full font-bold ${exam.active ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-500'}`}>
-                            {exam.active ? "Active" : "Draft"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Link href="/admin/questions" className="text-xs text-primary-400 hover:text-primary-300 font-medium">Manage MCQs →</Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="p-8 space-y-3">
+                {[...Array(4)].map((_, i) => <div key={i} className="h-10 bg-slate-800 rounded-xl animate-pulse" />)}
               </div>
+            ) : exams.length === 0 ? (
+              <div className="p-16 text-center">
+                <BookOpen className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+                <p className="text-slate-400 font-medium">No exams yet</p>
+                <p className="text-slate-600 text-sm mt-1">Create your first exam to get started</p>
+                <Link href="/admin/tests">
+                  <button className="mt-4 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-bold hover:bg-primary-500 transition-colors">Create Exam</button>
+                </Link>
+              </div>
+            ) : (
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-800">
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Exam</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Questions</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exams.slice(0, 6).map((exam: any, i: number) => (
+                    <motion.tr key={exam._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="font-semibold text-white text-sm">{exam.title}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{exam.durationMinutes}m duration</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-xs bg-primary-500/15 text-primary-400 px-2.5 py-1 rounded-lg border border-primary-500/20 font-medium">{exam.category}</span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-300 text-sm font-semibold">{exam.questionCount ?? 0}</td>
+                      <td className="px-6 py-4">
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
+                          exam.status === "published" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20"
+                          : exam.status === "scheduled" ? "bg-blue-500/15 text-blue-400 border-blue-500/20"
+                          : "bg-slate-700 text-slate-400 border-slate-600"
+                        }`}>
+                          {exam.status === "published" ? "● Published" : exam.status === "scheduled" ? "◷ Scheduled" : "○ Draft"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link href="/admin/questions" className="text-xs text-primary-400 hover:text-primary-300 font-semibold transition-colors">Manage MCQs →</Link>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
-        </motion.div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </div>
   );
 }
