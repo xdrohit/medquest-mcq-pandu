@@ -1,17 +1,38 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { Activity, LogIn, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Activity, LogIn, LogOut, ChevronDown, User, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { Button } from "../ui/Button";
+
+interface AuthUser {
+  name: string;
+  role: string;
+  userId: string;
+}
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Mock state for authentication (to be replaced with actual auth logic)
-  const isAuthenticated = false;
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((data) => {
+        setUser(data.user || null);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/";
+  };
 
   return (
     <motion.header
@@ -44,14 +65,87 @@ export const Navbar = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            {isAuthenticated ? (
-              <Link href="/dashboard">
-                <Button variant="glass" size="sm">
-                  <User className="w-4 h-4" />
-                  Dashboard
-                </Button>
-              </Link>
+            {loading ? (
+              <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
+            ) : user ? (
+              // ✅ LOGGED IN: Show user info + dropdown
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 pl-3 pr-2 py-2 rounded-xl bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors group"
+                >
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="hidden sm:block text-left">
+                    <p className="text-xs font-bold text-slate-800 leading-tight">{user.name}</p>
+                    <p className="text-xs text-primary-600 capitalize leading-tight">{user.role}</p>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50"
+                    >
+                      {/* User info header */}
+                      <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-accent-50 border-b border-slate-100">
+                        <p className="text-sm font-bold text-slate-800">{user.name}</p>
+                        <p className="text-xs text-slate-500 capitalize">{user.role} account</p>
+                      </div>
+
+                      {/* Menu items */}
+                      <div className="p-2">
+                        <Link
+                          href={user.role === 'admin' ? '/admin' : '/dashboard'}
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors"
+                        >
+                          {user.role === 'admin' ? (
+                            <ShieldCheck className="w-4 h-4 text-primary-500" />
+                          ) : (
+                            <LayoutDashboard className="w-4 h-4 text-primary-500" />
+                          )}
+                          {user.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
+                        </Link>
+
+                        {user.role === 'student' && (
+                          <Link
+                            href="/dashboard/profile"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors"
+                          >
+                            <User className="w-4 h-4 text-slate-400" />
+                            My Profile
+                          </Link>
+                        )}
+
+                        <div className="border-t border-slate-100 mt-2 pt-2">
+                          <button
+                            onClick={() => { setDropdownOpen(false); handleLogout(); }}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-50 text-red-600 text-sm font-medium transition-colors"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Click outside to close */}
+                {dropdownOpen && (
+                  <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                )}
+              </div>
             ) : (
+              // ❌ NOT LOGGED IN: Show Sign In button
               <Link href="/login">
                 <Button variant="primary" size="sm">
                   <LogIn className="w-4 h-4" />
