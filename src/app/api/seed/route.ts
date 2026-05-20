@@ -14,12 +14,12 @@ export async function GET() {
     await Question.deleteMany({});
 
     // Seed Master Admin User
-    const adminExists = await User.findOne({ email: 'admin@medquest.ai' });
+    const adminExists = await User.findOne({ email: 'rohithubhai3@gmail.com' });
     if (!adminExists) {
-      const hashedPassword = await bcrypt.hash('Admin@1234', 10);
+      const hashedPassword = await bcrypt.hash('@Akkiakki1', 10);
       await User.create({
         name: 'Master Admin',
-        email: 'admin@medquest.ai',
+        email: 'rohithubhai3@gmail.com',
         password: hashedPassword,
         role: 'admin'
       });
