@@ -19,9 +19,19 @@ export default function HomePage() {
     <main className="flex min-h-screen flex-col items-center pt-24 pb-12 px-4 overflow-hidden relative">
       <Navbar />
 
+      {/* Cinematic Medical Background Image */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* The medical image we generated */}
+        <div className="absolute inset-0 bg-[url('/medical-bg.png')] bg-cover bg-center bg-no-repeat opacity-60" />
+        {/* Gradient overlays to ensure text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/80 to-slate-50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-transparent to-transparent" />
+      </div>
+
       {/* Decorative background elements */}
-      <div className="absolute top-40 left-20 w-72 h-72 bg-primary-400/20 rounded-full blur-3xl animate-pulse-slow" />
-      <div className="absolute top-60 right-20 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-40 left-20 w-72 h-72 bg-primary-400/30 rounded-full blur-3xl animate-pulse-slow z-0" />
+      <div className="absolute top-60 right-20 w-96 h-96 bg-accent-400/30 rounded-full blur-3xl animate-pulse-slow z-0" style={{ animationDelay: '2s' }} />
+
 
       <section className="w-full max-w-7xl mx-auto flex flex-col items-center justify-center text-center mt-20 relative z-10">
         <motion.div
