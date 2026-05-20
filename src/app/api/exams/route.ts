@@ -1,14 +1,29 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Exam from '@/models/Exam';
+import Question from '@/models/Question';
 
-export async function GET() {
+// GET all exams (admin: show all, student: show active only)
+export async function GET(req: Request) {
   try {
     await dbConnect();
-    const exams = await Exam.find({ active: true }).sort({ createdAt: -1 });
-    return NextResponse.json(exams, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ message: 'Error fetching exams' }, { status: 500 });
+    const { searchParams } = new URL(req.url);
+    const all = searchParams.get('all'); // admin passes ?all=true
+
+    const query = all === 'true' ? {} : { active: true };
+    const exams = await Exam.find(query).sort({ createdAt: -1 });
+
+    // Attach question count per exam
+    const examsWithCount = await Promise.all(
+      exams.map(async (exam) => {
+        const count = await Question.countDocuments({ examId: exam._id });
+        return { ...exam.toObject(), questionCount: count };
+      })
+    );
+
+    return NextResponse.json(examsWithCount, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
@@ -18,7 +33,32 @@ export async function POST(req: Request) {
     const data = await req.json();
     const exam = await Exam.create(data);
     return NextResponse.json(exam, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ message: 'Error creating exam' }, { status: 500 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
+
+// PUT update exam (toggle active, edit details)
+export async function PUT(req: Request) {
+  try {
+    await dbConnect();
+    const { id, ...data } = await req.json();
+    const exam = await Exam.findByIdAndUpdate(id, data, { new: true });
+    return NextResponse.json(exam, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
+
+// DELETE exam (and its questions)
+export async function DELETE(req: Request) {
+  try {
+    await dbConnect();
+    const { id } = await req.json();
+    await Exam.findByIdAndDelete(id);
+    await Question.deleteMany({ examId: id });
+    return NextResponse.json({ message: 'Exam and questions deleted' }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

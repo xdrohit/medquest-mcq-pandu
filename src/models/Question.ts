@@ -5,8 +5,13 @@ const QuestionSchema = new mongoose.Schema({
   text: { type: String, required: true },
   options: [{ type: String, required: true }],
   correctAnswer: { type: Number, required: true }, // Index of the correct option
+  explanation: { type: String },
+  difficulty: { type: String, enum: ['easy', 'medium', 'hard'], default: 'medium' },
+  topic: { type: String },
   imageUrl: { type: String },
+  randomize: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.models.Question || mongoose.model('Question', QuestionSchema);
+

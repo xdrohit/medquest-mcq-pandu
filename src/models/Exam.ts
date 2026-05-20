@@ -6,7 +6,9 @@ const ExamSchema = new mongoose.Schema({
   category: { type: String, required: true },
   durationMinutes: { type: Number, required: true },
   active: { type: Boolean, default: true },
+  tags: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
+
 });
 
 export default mongoose.models.Exam || mongoose.model('Exam', ExamSchema);

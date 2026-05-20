@@ -1,0 +1,524 @@
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Plus, Search, Filter, Trash2, Edit2, Upload, BookOpen,
+  ChevronDown, X, Check, AlertCircle, Shuffle, Image as ImageIcon, Tag
+} from "lucide-react";
+
+const CATEGORIES = ["MBBS", "Nursing", "Pharmacy", "BDS", "Paramedical"];
+const DIFFICULTIES = ["easy", "medium", "hard"];
+
+const difficultyColor: Record<string, string> = {
+  easy: "bg-green-500/20 text-green-400 border-green-500/30",
+  medium: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  hard: "bg-red-500/20 text-red-400 border-red-500/30",
+};
+
+// ─── Question Form Modal ───────────────────────────────────────────────────────
+function QuestionModal({ exams, question, onClose, onSaved }: {
+  exams: any[], question?: any, onClose: () => void, onSaved: () => void
+}) {
+  const isEdit = !!question;
+  const [form, setForm] = useState({
+    examId: question?.examId?._id || question?.examId || "",
+    text: question?.text || "",
+    options: question?.options || ["", "", "", ""],
+    correctAnswer: question?.correctAnswer ?? 0,
+    explanation: question?.explanation || "",
+    difficulty: question?.difficulty || "medium",
+    topic: question?.topic || "",
+    imageUrl: question?.imageUrl || "",
+    randomize: question?.randomize || false,
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const setOption = (i: number, val: string) => {
+    const opts = [...form.options];
+    opts[i] = val;
+    setForm(f => ({ ...f, options: opts }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.examId) { setError("Please select an exam."); return; }
+    if (form.options.some((o: string) => !o.trim())) { setError("All 4 options are required."); return; }
+    setSaving(true); setError("");
+    try {
+      const url = isEdit ? `/api/admin/questions/${question._id}` : "/api/admin/questions";
+      const method = isEdit ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method, headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      onSaved();
+    } catch (err: any) {
+      setError(err.message || "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-end">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <motion.div
+        initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+        className="relative z-10 w-full max-w-xl h-screen bg-slate-900 border-l border-slate-700 overflow-y-auto flex flex-col"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+          <div>
+            <h2 className="text-xl font-bold text-white">{isEdit ? "Edit Question" : "Add New MCQ"}</h2>
+            <p className="text-slate-400 text-sm mt-0.5">Fill in all details carefully.</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-5">
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-950/50 border border-red-800 rounded-xl text-red-400 text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          {/* Exam Selector */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Exam / Course</label>
+            <select
+              value={form.examId}
+              onChange={e => setForm(f => ({ ...f, examId: e.target.value }))}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+              required
+            >
+              <option value="">-- Select Exam --</option>
+              {exams.map((ex: any) => (
+                <option key={ex._id} value={ex._id}>{ex.title} ({ex.category})</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Question Text */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Question Text</label>
+            <textarea
+              value={form.text}
+              onChange={e => setForm(f => ({ ...f, text: e.target.value }))}
+              rows={3}
+              required
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500 resize-none"
+              placeholder="Enter the MCQ question..."
+            />
+          </div>
+
+          {/* Options */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Options (select correct answer)</label>
+            {form.options.map((opt: string, i: number) => (
+              <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${form.correctAnswer === i ? 'border-green-500/50 bg-green-500/10' : 'border-slate-700 bg-slate-800'}`}>
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, correctAnswer: i }))}
+                  className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${form.correctAnswer === i ? 'border-green-400 bg-green-400' : 'border-slate-600 hover:border-slate-400'}`}
+                >
+                  {form.correctAnswer === i && <Check className="w-4 h-4 text-black" />}
+                </button>
+                <input
+                  type="text"
+                  value={opt}
+                  onChange={e => setOption(i, e.target.value)}
+                  required
+                  className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-slate-500"
+                  placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                />
+                <span className={`text-xs font-bold px-2 py-0.5 rounded ${form.correctAnswer === i ? 'text-green-400' : 'text-slate-600'}`}>
+                  {String.fromCharCode(65 + i)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Explanation */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Explanation</label>
+            <textarea
+              value={form.explanation}
+              onChange={e => setForm(f => ({ ...f, explanation: e.target.value }))}
+              rows={2}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500 resize-none"
+              placeholder="Explain why the correct answer is right..."
+            />
+          </div>
+
+          {/* Difficulty + Topic */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Difficulty</label>
+              <select
+                value={form.difficulty}
+                onChange={e => setForm(f => ({ ...f, difficulty: e.target.value }))}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+              >
+                {DIFFICULTIES.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Topic Tag</label>
+              <input
+                type="text"
+                value={form.topic}
+                onChange={e => setForm(f => ({ ...f, topic: e.target.value }))}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                placeholder="e.g. Cardiology"
+              />
+            </div>
+          </div>
+
+          {/* Image URL */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Image URL (optional)</label>
+            <input
+              type="url"
+              value={form.imageUrl}
+              onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+              placeholder="https://..."
+            />
+          </div>
+
+          {/* Randomize toggle */}
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <div className={`relative w-12 h-6 rounded-full transition-colors ${form.randomize ? 'bg-primary-500' : 'bg-slate-700'}`} onClick={() => setForm(f => ({ ...f, randomize: !f.randomize }))}>
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.randomize ? 'translate-x-7' : 'translate-x-1'}`} />
+            </div>
+            <span className="text-sm text-slate-300 font-medium flex items-center gap-1.5"><Shuffle className="w-4 h-4" /> Randomize Options</span>
+          </label>
+        </form>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-800 sticky bottom-0 bg-slate-900 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-medium transition-colors">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form=""
+            onClick={handleSubmit as any}
+            disabled={saving}
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {saving ? "Saving..." : isEdit ? "Update Question" : "Add Question"}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Bulk Upload Modal ─────────────────────────────────────────────────────────
+function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: () => void, onSaved: () => void }) {
+  const [examId, setExamId] = useState("");
+  const [json, setJson] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+
+  const handleUpload = async () => {
+    if (!examId) { setError("Select an exam first."); return; }
+    let parsed;
+    try { parsed = JSON.parse(json); } catch { setError("Invalid JSON format."); return; }
+    if (!Array.isArray(parsed)) { setError("JSON must be an array of questions."); return; }
+    setUploading(true); setError(""); setResult("");
+    try {
+      const questions = parsed.map((q: any) => ({ ...q, examId }));
+      const res = await fetch("/api/admin/questions/bulk", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questions }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setResult(data.message);
+      onSaved();
+    } catch (err: any) {
+      setError(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const sampleJson = `[
+  {
+    "text": "Which organ produces insulin?",
+    "options": ["Liver", "Kidney", "Pancreas", "Spleen"],
+    "correctAnswer": 2,
+    "explanation": "Pancreas produces insulin via beta cells.",
+    "difficulty": "easy",
+    "topic": "Endocrinology"
+  }
+]`;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+        className="relative z-10 w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden"
+      >
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center gap-2"><Upload className="w-5 h-5 text-primary-400" /> Bulk Upload MCQs</h2>
+            <p className="text-slate-400 text-sm">Paste JSON array of questions below.</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X className="w-5 h-5" /></button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {(error || result) && (
+            <div className={`p-3 rounded-xl text-sm border ${result ? 'bg-green-950/50 border-green-700 text-green-400' : 'bg-red-950/50 border-red-800 text-red-400'}`}>
+              {result || error}
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Target Exam</label>
+            <select
+              value={examId} onChange={e => setExamId(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+            >
+              <option value="">-- Select Exam --</option>
+              {exams.map((ex: any) => <option key={ex._id} value={ex._id}>{ex.title}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">JSON Data</label>
+            <textarea
+              value={json} onChange={e => setJson(e.target.value)}
+              rows={10}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-green-300 text-sm font-mono focus:outline-none focus:border-primary-500 resize-none"
+              placeholder={sampleJson}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button onClick={() => setJson(sampleJson)} className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:bg-slate-800 text-sm transition-colors">
+              Load Sample
+            </button>
+            <button
+              onClick={handleUpload} disabled={uploading}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {uploading ? "Uploading..." : "Upload Questions"}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── MAIN PAGE ─────────────────────────────────────────────────────────────────
+export default function AdminQuestionsPage() {
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [exams, setExams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterExam, setFilterExam] = useState("");
+  const [filterDiff, setFilterDiff] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [modalMode, setModalMode] = useState<null | "add" | "edit">(null);
+  const [editQuestion, setEditQuestion] = useState<any>(null);
+  const [bulkModal, setBulkModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (filterExam) params.set("examId", filterExam);
+    if (filterDiff) params.set("difficulty", filterDiff);
+    if (search) params.set("search", search);
+    const [qRes, eRes] = await Promise.all([
+      fetch(`/api/admin/questions?${params}`),
+      fetch("/api/exams?all=true"),
+    ]);
+    setQuestions(await qRes.json());
+    setExams(await eRes.json());
+    setLoading(false);
+  }, [filterExam, filterDiff, search]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const toggleSelect = (id: string) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+  const toggleAll = () => setSelected(selected.length === questions.length ? [] : questions.map((q: any) => q._id));
+
+  const handleBulkDelete = async () => {
+    if (!selected.length || !confirm(`Delete ${selected.length} questions?`)) return;
+    setDeleting(true);
+    await fetch("/api/admin/questions", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: selected }) });
+    setSelected([]);
+    fetchAll();
+    setDeleting(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this question?")) return;
+    await fetch(`/api/admin/questions/${id}`, { method: "DELETE" });
+    fetchAll();
+  };
+
+  const openEdit = (q: any) => { setEditQuestion(q); setModalMode("edit"); };
+
+  return (
+    <main className="min-h-screen bg-slate-950 text-slate-100">
+      <AnimatePresence>
+        {(modalMode === "add" || modalMode === "edit") && (
+          <QuestionModal
+            exams={exams}
+            question={modalMode === "edit" ? editQuestion : undefined}
+            onClose={() => { setModalMode(null); setEditQuestion(null); }}
+            onSaved={() => { setModalMode(null); setEditQuestion(null); fetchAll(); }}
+          />
+        )}
+        {bulkModal && (
+          <BulkUploadModal exams={exams} onClose={() => setBulkModal(false)} onSaved={() => { setBulkModal(false); fetchAll(); }} />
+        )}
+      </AnimatePresence>
+
+      {/* Top Header */}
+      <div className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-8 py-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/admin" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center gap-1">← Dashboard</Link>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <BookOpen className="text-primary-400 w-6 h-6" /> MCQ Management
+          </h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-sm font-medium transition-colors">
+            <Upload className="w-4 h-4" /> Bulk Upload
+          </button>
+          <button onClick={() => setModalMode("add")} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold shadow-lg hover:opacity-90 transition-opacity">
+            <Plus className="w-4 h-4" /> Add Question
+          </button>
+        </div>
+      </div>
+
+      <div className="px-8 py-6">
+        {/* Filters Bar */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <div className="relative flex-grow max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              type="text" placeholder="Search questions..."
+              value={search} onChange={e => setSearch(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500"
+            />
+          </div>
+          <select
+            value={filterExam} onChange={e => setFilterExam(e.target.value)}
+            className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500"
+          >
+            <option value="">All Exams</option>
+            {exams.map((ex: any) => <option key={ex._id} value={ex._id}>{ex.title}</option>)}
+          </select>
+          <select
+            value={filterDiff} onChange={e => setFilterDiff(e.target.value)}
+            className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500"
+          >
+            <option value="">All Difficulties</option>
+            {DIFFICULTIES.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>)}
+          </select>
+          {selected.length > 0 && (
+            <button onClick={handleBulkDelete} disabled={deleting} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600/20 border border-red-700 text-red-400 hover:bg-red-600/30 text-sm font-medium transition-colors">
+              <Trash2 className="w-4 h-4" /> Delete {selected.length} Selected
+            </button>
+          )}
+          <span className="ml-auto text-slate-500 text-sm">{questions.length} questions</span>
+        </div>
+
+        {/* Questions Table */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-800 bg-slate-800/50">
+                  <th className="p-4 w-10">
+                    <input type="checkbox" checked={selected.length === questions.length && questions.length > 0} onChange={toggleAll} className="accent-primary-500 w-4 h-4 cursor-pointer" />
+                  </th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Question</th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Exam</th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Topic</th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Difficulty</th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="border-b border-slate-800/50">
+                      <td colSpan={6} className="p-4"><div className="h-4 bg-slate-800 rounded animate-pulse" /></td>
+                    </tr>
+                  ))
+                ) : questions.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-16 text-center text-slate-500">
+                      <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                      No questions found. Add your first MCQ!
+                    </td>
+                  </tr>
+                ) : questions.map((q: any) => (
+                  <motion.tr
+                    key={q._id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={`border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors ${selected.includes(q._id) ? 'bg-primary-900/20' : ''}`}
+                  >
+                    <td className="p-4">
+                      <input type="checkbox" checked={selected.includes(q._id)} onChange={() => toggleSelect(q._id)} className="accent-primary-500 w-4 h-4 cursor-pointer" />
+                    </td>
+                    <td className="p-4 max-w-sm">
+                      <p className="text-white text-sm font-medium line-clamp-2">{q.text}</p>
+                      {q.randomize && <span className="text-xs text-purple-400 mt-1 flex items-center gap-1"><Shuffle className="w-3 h-3" /> Randomized</span>}
+                    </td>
+                    <td className="p-4">
+                      <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded-lg border border-primary-500/30">
+                        {q.examId?.title || "—"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      {q.topic ? (
+                        <span className="text-xs flex items-center gap-1 text-slate-400"><Tag className="w-3 h-3" />{q.topic}</span>
+                      ) : <span className="text-slate-600 text-xs">—</span>}
+                    </td>
+                    <td className="p-4">
+                      <span className={`text-xs px-2.5 py-1 rounded-full border font-semibold capitalize ${difficultyColor[q.difficulty] || difficultyColor.medium}`}>
+                        {q.difficulty || "medium"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => openEdit(q)} className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-primary-400 transition-colors">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(q._id)} className="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
