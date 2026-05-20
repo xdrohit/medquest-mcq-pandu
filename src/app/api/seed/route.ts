@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Exam from '@/models/Exam';
 import Question from '@/models/Question';
+import User from '@/models/User';
+import bcrypt from 'bcrypt';
 
 export async function GET() {
   try {
@@ -10,6 +12,18 @@ export async function GET() {
     // Clean existing data
     await Exam.deleteMany({});
     await Question.deleteMany({});
+
+    // Seed Master Admin User
+    const adminExists = await User.findOne({ email: 'admin@medquest.ai' });
+    if (!adminExists) {
+      const hashedPassword = await bcrypt.hash('Admin@1234', 10);
+      await User.create({
+        name: 'Master Admin',
+        email: 'admin@medquest.ai',
+        password: hashedPassword,
+        role: 'admin'
+      });
+    }
 
     // Seed Exams
     const exam1 = await Exam.create({
