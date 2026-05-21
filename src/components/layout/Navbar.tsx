@@ -48,8 +48,8 @@ export const Navbar = () => {
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 text-white shadow-[0_0_15px_rgba(14,165,233,0.5)] group-hover:shadow-[0_0_25px_rgba(14,165,233,0.8)] transition-shadow">
               <Activity className="w-6 h-6" />
             </div>
-            <span className="text-xl font-bold text-slate-800 tracking-tight">
-              Med<span className="text-primary-600">Quest</span>
+            <span className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
+              Daily Dose <span className="text-primary-600 dark:text-primary-400">MCQ</span>
             </span>
           </Link>
 
@@ -58,10 +58,10 @@ export const Navbar = () => {
             <Link href="/" className={`text-sm font-medium transition-colors ${pathname === '/' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Home
             </Link>
-            <Link href="/exams" className={`text-sm font-medium transition-colors ${pathname === '/exams' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
+            <Link href="/dashboard" className={`text-sm font-medium transition-colors ${pathname === '/dashboard' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Exams
             </Link>
-            <Link href="/leaderboard" className={`text-sm font-medium transition-colors ${pathname === '/leaderboard' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
+            <Link href="/dashboard" className={`text-sm font-medium transition-colors ${pathname === '/dashboard' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Leaderboard
             </Link>
           </nav>

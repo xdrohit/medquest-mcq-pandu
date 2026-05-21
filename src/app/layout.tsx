@@ -10,8 +10,8 @@ const inter = Inter({
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "MedQuest | AI-Powered Medical MCQ Platform",
-  description: "Next-generation futuristic Medical MCQ test platform for Nursing, MBBS, BDS, Pharmacy, and Paramedical students.",
+  title: "Daily Dose MCQ | Professional Medical Test Platform",
+  description: "Advanced AI-driven MCQ platform for Nursing, MBBS, BDS, and Pharmacy.",
 };
 
 export default function RootLayout({

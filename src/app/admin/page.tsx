@@ -30,7 +30,7 @@ function AdminSidebar({ onLogout }: { onLogout: () => void }) {
             <Activity className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="text-slate-900 dark:text-white font-bold text-lg leading-none">MedQuest</span>
+            <span className="text-slate-900 dark:text-white font-bold text-lg leading-none transition-colors">Daily Dose MCQ</span>
             <p className="text-xs text-primary-600 dark:text-primary-400 font-semibold mt-0.5 flex items-center gap-1">
               <ShieldCheck className="w-3 h-3" /> Admin Panel
             </p>

@@ -17,7 +17,7 @@ export default function ProfilePage() {
     // For now, we mock the fetch or expect a future API integration.
     setUser({
       name: "Student Profile",
-      email: "student@medquest.ai",
+      email: "student@dailydosemcq.com",
       role: "student",
       lastLogin: new Date().toLocaleDateString()
     });
@@ -38,7 +38,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto">
         <header className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">AI Identity</h1>
-          <p className="text-slate-500 mt-2">Manage your MedQuest profile and security settings.</p>
+          <p className="text-slate-500 mt-2">Manage your Daily Dose MCQ profile and security settings.</p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

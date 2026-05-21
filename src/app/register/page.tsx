@@ -76,7 +76,7 @@ export default function RegisterPage() {
         </Link>
 
         <GlassCard className="p-8 shadow-2xl">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2 text-center">Join MedQuest</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2 text-center">Join Daily Dose MCQ</h2>
           <p className="text-slate-500 text-center mb-8">Start your journey to medical excellence.</p>
 
           {error && (

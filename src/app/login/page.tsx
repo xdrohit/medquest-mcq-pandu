@@ -122,7 +122,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="block w-full pl-11 pr-4 py-3.5 border-2 border-white/60 rounded-2xl leading-5 bg-white/30 backdrop-blur-md placeholder-slate-400 text-slate-900 focus:outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 focus:bg-white/50 transition-all shadow-inner"
-                      placeholder="student@medquest.ai"
+                      placeholder="student@dailydosemcq.com"
                     />
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-8 text-center text-sm font-medium text-slate-500">
-                New to MedQuest?{" "}
+                New to Daily Dose MCQ?{" "}
                 <Link href="/register" className="text-primary-600 hover:text-primary-700 hover:underline underline-offset-4 transition-all">
                   Create Account
                 </Link>

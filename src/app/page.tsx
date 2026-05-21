@@ -41,25 +41,25 @@ export default function HomePage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 text-sm font-medium text-primary-700 dark:text-primary-300 shadow-sm dark:shadow-none"
         >
           <span className="flex h-2 w-2 rounded-full bg-accent-500 animate-pulse"></span>
-          Next-Generation AI Learning Platform
+          Daily Dose MCQ • Professional Test Conductors
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight max-w-4xl transition-colors"
+          className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight max-w-5xl transition-colors"
         >
-          Master Your <span className="text-gradient">Medical Exams</span> With AI-Powered Precision
+          Your Daily Dose of Excellence: <span className="text-gradient">Premium Medical Tests</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-6 text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl transition-colors"
+          className="mt-6 text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl transition-colors leading-relaxed"
         >
-          An immersive, distraction-free MCQ platform designed specifically for Nursing, MBBS, BDS, and Pharmacy students.
+          We conduct high-quality, professional MCQ tests designed specifically for Nursing, MBBS, BDS, and Pharmacy students. Join thousands of students practicing daily to guarantee their success.
         </motion.p>
 
         <motion.div
@@ -109,10 +109,10 @@ export default function HomePage() {
             className="flex-1"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6 transition-colors">
-              Distraction-Free, <span className="text-gradient">Lightning Fast</span> Performance
+              We Conduct The <span className="text-gradient">Most Realistic</span> MCQ Exams
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 transition-colors">
-              Our interface is meticulously crafted to keep you focused. No clutter, just pure performance and intelligent analytics to track your growth.
+              Our interface is meticulously crafted to mimic real-world medical testing environments. No clutter, just pure performance, verified questions, and intelligent analytics to track your growth daily.
             </p>
             
             <ul className="space-y-4">
