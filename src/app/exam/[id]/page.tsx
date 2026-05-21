@@ -168,16 +168,16 @@ export default function FullscreenExamEngine() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center transition-colors duration-300">
         <div className="w-16 h-16 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mb-4" />
-        <h2 className="text-xl font-bold text-slate-300 animate-pulse">Initializing Exam Engine...</h2>
+        <h2 className="text-xl font-bold text-slate-700 dark:text-slate-300 animate-pulse">Initializing Exam Engine...</h2>
       </div>
     );
   }
 
   if (!exam || questions.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center text-slate-900 dark:text-white transition-colors duration-300">
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
         <h2 className="text-xl font-bold">Exam not found</h2>
         <Button className="mt-4" onClick={() => router.push('/dashboard')}>Return to Dashboard</Button>
@@ -189,17 +189,17 @@ export default function FullscreenExamEngine() {
   const isDangerTime = timeLeft < 300;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col font-sans selection:bg-primary-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 flex flex-col font-sans selection:bg-primary-500/30 transition-colors duration-300">
       
       {/* Top Header */}
-      <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40">
+      <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 transition-colors duration-300 shadow-sm dark:shadow-none">
         <div>
-          <h1 className="text-white font-bold tracking-tight line-clamp-1">{exam.title}</h1>
+          <h1 className="text-slate-900 dark:text-white font-bold tracking-tight line-clamp-1">{exam.title}</h1>
           <p className="text-xs text-slate-500 uppercase tracking-widest">{exam.category}</p>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-black font-mono text-lg ${isDangerTime ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-slate-800 text-primary-400 border border-slate-700'}`}>
+          <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-black font-mono text-lg ${isDangerTime ? 'bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-500 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-primary-600 dark:text-primary-400 border border-slate-200 dark:border-slate-700'}`}>
             <Clock className="w-5 h-5" />
             {formatTime(timeLeft)}
           </div>
@@ -208,7 +208,7 @@ export default function FullscreenExamEngine() {
             {submitting ? "Submitting..." : "Submit Test"}
           </Button>
 
-          <button onClick={() => setShowPalette(!showPalette)} className="lg:hidden p-2 rounded-lg bg-slate-800 text-slate-300">
+          <button onClick={() => setShowPalette(!showPalette)} className="lg:hidden p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
             <Grid className="w-5 h-5" />
           </button>
         </div>
@@ -221,10 +221,10 @@ export default function FullscreenExamEngine() {
           <div className="max-w-4xl w-full mx-auto flex-1 flex flex-col">
             
             {/* Question Header */}
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
               <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Question {currentIndex + 1} of {questions.length}</span>
               <div className="flex gap-2">
-                <button onClick={handleMarkReview} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-colors">
+                <button onClick={handleMarkReview} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors">
                   <Bookmark className="w-4 h-4" /> Mark for Review
                 </button>
               </div>
@@ -237,7 +237,7 @@ export default function FullscreenExamEngine() {
                 initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}
                 className="flex-1 flex flex-col"
               >
-                <h2 className="text-xl lg:text-2xl font-medium text-white mb-10 leading-relaxed">
+                <h2 className="text-xl lg:text-2xl font-medium text-slate-900 dark:text-white mb-10 leading-relaxed">
                   {question.text}
                 </h2>
 
@@ -250,12 +250,12 @@ export default function FullscreenExamEngine() {
                         onClick={() => handleSelectOption(idx)}
                         className={`w-full text-left p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-base lg:text-lg flex items-center gap-4 ${
                           isSelected
-                            ? "border-primary-500 bg-primary-500/10 text-white shadow-[0_0_20px_rgba(59,130,246,0.15)]"
-                            : "border-slate-800 bg-slate-900/50 text-slate-300 hover:border-slate-700 hover:bg-slate-800"
+                            ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10 text-slate-900 dark:text-white shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm dark:shadow-none"
                         }`}
                       >
                         <div className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm ${
-                          isSelected ? "border-primary-500 bg-primary-500 text-white" : "border-slate-600 text-slate-500"
+                          isSelected ? "border-primary-500 bg-primary-500 text-white" : "border-slate-300 dark:border-slate-600 text-slate-500"
                         }`}>
                           {String.fromCharCode(65 + idx)}
                         </div>
@@ -270,12 +270,12 @@ export default function FullscreenExamEngine() {
             {/* Navigation Footer */}
             <div className="mt-auto pt-8 flex items-center justify-between">
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={handleClear} disabled={answers[currentIndex] === undefined} className="border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 border">
+                <Button variant="ghost" onClick={handleClear} disabled={answers[currentIndex] === undefined} className="border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border">
                   Clear Selection
                 </Button>
               </div>
               <div className="flex gap-3">
-                <Button variant="secondary" onClick={handlePrev} disabled={currentIndex === 0} className="bg-slate-800 text-white hover:bg-slate-700 font-bold">
+                <Button variant="secondary" onClick={handlePrev} disabled={currentIndex === 0} className="bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-700 font-bold border-none">
                   <ChevronLeft className="w-5 h-5 mr-1" /> Prev
                 </Button>
                 {currentIndex === questions.length - 1 ? (
@@ -294,11 +294,11 @@ export default function FullscreenExamEngine() {
         </main>
 
         {/* Sidebar Palette */}
-        <aside className={`fixed inset-y-0 right-0 z-50 w-72 bg-slate-900 border-l border-slate-800 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${showPalette ? 'translate-x-0' : 'translate-x-full'}`}>
+        <aside className={`fixed inset-y-0 right-0 z-50 w-72 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${showPalette ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="h-full flex flex-col">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-              <h3 className="font-bold text-white flex items-center gap-2"><Grid className="w-4 h-4 text-primary-400" /> Question Palette</h3>
-              <button onClick={() => setShowPalette(false)} className="lg:hidden p-1 text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Grid className="w-4 h-4 text-primary-600 dark:text-primary-400" /> Question Palette</h3>
+              <button onClick={() => setShowPalette(false)} className="lg:hidden p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             
             <div className="flex-1 overflow-y-auto p-4">
@@ -306,16 +306,16 @@ export default function FullscreenExamEngine() {
                 {questions.map((_, idx) => {
                   const status = statusMap[idx] || 0;
                   const isActive = currentIndex === idx;
-                  let bgClass = "bg-slate-800 text-slate-400 border-transparent"; // 0: unvisited
-                  if (status === 1) bgClass = "bg-red-500/20 text-red-400 border-red-500/30"; // visited, unanswered
-                  if (status === 2) bgClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"; // answered
-                  if (status === 3) bgClass = "bg-amber-500/20 text-amber-400 border-amber-500/30"; // marked for review
+                  let bgClass = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-transparent"; // 0: unvisited
+                  if (status === 1) bgClass = "bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30"; // visited, unanswered
+                  if (status === 2) bgClass = "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30"; // answered
+                  if (status === 3) bgClass = "bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30"; // marked for review
                   
                   return (
                     <button
                       key={idx}
                       onClick={() => navigateTo(idx)}
-                      className={`w-10 h-10 rounded-lg border flex items-center justify-center font-bold text-sm transition-all hover:scale-105 ${bgClass} ${isActive ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
+                      className={`w-10 h-10 rounded-lg border flex items-center justify-center font-bold text-sm transition-all hover:scale-105 ${bgClass} ${isActive ? 'ring-2 ring-slate-900 dark:ring-white ring-offset-2 ring-offset-white dark:ring-offset-slate-900' : ''}`}
                     >
                       {idx + 1}
                     </button>
@@ -324,18 +324,18 @@ export default function FullscreenExamEngine() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-slate-800 space-y-2 text-xs font-semibold text-slate-400">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/30" /> Answered</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/30" /> Unanswered</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-amber-500/20 border border-amber-500/30" /> Marked for Review</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-800" /> Not Visited</div>
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30" /> Answered</div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-red-50 dark:bg-red-500/20 border border-red-200 dark:border-red-500/30" /> Unanswered</div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-amber-50 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30" /> Marked for Review</div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-100 dark:bg-slate-800 border border-transparent" /> Not Visited</div>
             </div>
           </div>
         </aside>
 
         {/* Overlay for mobile palette */}
         {showPalette && (
-          <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setShowPalette(false)} />
+          <div className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" onClick={() => setShowPalette(false)} />
         )}
       </div>
     </div>

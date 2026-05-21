@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, LogIn, LogOut, ChevronDown, User, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { Button } from "../ui/Button";
+import { ThemeToggle } from "../ui/ThemeToggle";
 
 interface AuthUser {
   name: string;
@@ -52,36 +53,39 @@ export const Navbar = () => {
             </span>
           </Link>
 
+
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className={`text-sm font-medium transition-colors ${pathname === '/' ? 'text-primary-600' : 'text-slate-600 hover:text-primary-500'}`}>
+            <Link href="/" className={`text-sm font-medium transition-colors ${pathname === '/' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Home
             </Link>
-            <Link href="/exams" className={`text-sm font-medium transition-colors ${pathname === '/exams' ? 'text-primary-600' : 'text-slate-600 hover:text-primary-500'}`}>
+            <Link href="/exams" className={`text-sm font-medium transition-colors ${pathname === '/exams' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Exams
             </Link>
-            <Link href="/leaderboard" className={`text-sm font-medium transition-colors ${pathname === '/leaderboard' ? 'text-primary-600' : 'text-slate-600 hover:text-primary-500'}`}>
+            <Link href="/leaderboard" className={`text-sm font-medium transition-colors ${pathname === '/leaderboard' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Leaderboard
             </Link>
           </nav>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
+            
             {loading ? (
-              <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
             ) : user ? (
               // ✅ LOGGED IN: Show user info + dropdown
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 pl-3 pr-2 py-2 rounded-xl bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors group"
+                  className="flex items-center gap-2 pl-3 pr-2 py-2 rounded-xl bg-primary-50 dark:bg-slate-900 border border-primary-100 dark:border-slate-800 hover:bg-primary-100 dark:hover:bg-slate-800 transition-colors group"
                 >
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-accent-400 flex items-center justify-center text-white text-xs font-bold">
                     {user.name?.charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden sm:block text-left">
-                    <p className="text-xs font-bold text-slate-800 leading-tight">{user.name}</p>
-                    <p className="text-xs text-primary-600 capitalize leading-tight">{user.role}</p>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">{user.name}</p>
+                    <p className="text-xs text-primary-600 dark:text-primary-400 capitalize leading-tight">{user.role}</p>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 <AnimatePresence>
@@ -91,12 +95,12 @@ export const Navbar = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -8, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50"
+                      className="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-slate-900 rounded-2xl shadow-xl dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden z-50"
                     >
                       {/* User info header */}
-                      <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-accent-50 border-b border-slate-100">
-                        <p className="text-sm font-bold text-slate-800">{user.name}</p>
-                        <p className="text-xs text-slate-500 capitalize">{user.role} account</p>
+                      <div className="px-4 py-3 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-slate-800 dark:to-slate-800 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{user.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{user.role} account</p>
                       </div>
 
                       {/* Menu items */}
@@ -104,7 +108,7 @@ export const Navbar = () => {
                         <Link
                           href={user.role === 'admin' ? '/admin' : '/dashboard'}
                           onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors"
+                          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium transition-colors"
                         >
                           {user.role === 'admin' ? (
                             <ShieldCheck className="w-4 h-4 text-primary-500" />
@@ -118,17 +122,17 @@ export const Navbar = () => {
                           <Link
                             href="/dashboard/profile"
                             onClick={() => setDropdownOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors"
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium transition-colors"
                           >
                             <User className="w-4 h-4 text-slate-400" />
                             My Profile
                           </Link>
                         )}
 
-                        <div className="border-t border-slate-100 mt-2 pt-2">
+                        <div className="border-t border-slate-100 dark:border-slate-800 mt-2 pt-2">
                           <button
                             onClick={() => { setDropdownOpen(false); handleLogout(); }}
-                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-50 text-red-600 text-sm font-medium transition-colors"
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium transition-colors"
                           >
                             <LogOut className="w-4 h-4" />
                             Sign Out
