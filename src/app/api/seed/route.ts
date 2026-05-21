@@ -61,18 +61,24 @@ export async function GET() {
         text: "Which of the following is the largest organ in the human body?",
         options: ["Heart", "Liver", "Skin", "Brain"],
         correctAnswer: 2,
+        topic: "Integumentary System",
+        explanation: "The skin is the largest organ of the body, with a total area of about 20 square feet. It protects us from microbes and the elements, helps regulate body temperature, and permits the sensations of touch, heat, and cold."
       },
       {
         examId: exam1._id,
         text: "What is the primary function of red blood cells?",
         options: ["Fight infection", "Carry oxygen", "Clot blood", "Produce antibodies"],
         correctAnswer: 1,
+        topic: "Hematology",
+        explanation: "Red blood cells contain hemoglobin, a protein that binds to oxygen. They carry oxygen from the lungs to all parts of the body and bring carbon dioxide back to the lungs to be exhaled."
       },
       {
         examId: exam1._id,
         text: "Which part of the brain controls balance and coordination?",
         options: ["Cerebrum", "Cerebellum", "Brainstem", "Hypothalamus"],
         correctAnswer: 1,
+        topic: "Neuroanatomy",
+        explanation: "The cerebellum (Latin for 'little brain') is located at the back of the brain. It is primarily responsible for motor control, including coordination, precision, and accurate timing of movements."
       }
     ]);
 
@@ -83,12 +89,16 @@ export async function GET() {
         text: "Which route of drug administration has 100% bioavailability?",
         options: ["Oral", "Intravenous (IV)", "Subcutaneous", "Intramuscular"],
         correctAnswer: 1,
+        topic: "Pharmacokinetics",
+        explanation: "Intravenous (IV) administration bypasses the absorption process entirely, delivering the drug directly into the systemic circulation, resulting in 100% bioavailability."
       },
       {
         examId: exam2._id,
         text: "What is the primary site of drug metabolism in the human body?",
         options: ["Kidneys", "Lungs", "Liver", "Intestines"],
         correctAnswer: 2,
+        topic: "Drug Metabolism",
+        explanation: "The liver is the principal site of drug metabolism. It contains enzymes, particularly the cytochrome P450 system, which alter the chemical structure of drugs to facilitate their excretion."
       }
     ]);
 
