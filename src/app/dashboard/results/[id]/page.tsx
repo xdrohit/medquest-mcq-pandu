@@ -87,17 +87,17 @@ export default function ResultDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center transition-colors">
         <div className="w-16 h-16 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mb-4" />
-        <p className="text-slate-400 font-bold animate-pulse">Analyzing your performance...</p>
+        <p className="text-slate-600 dark:text-slate-400 font-bold animate-pulse">Analyzing your performance...</p>
       </div>
     );
   }
 
   if (!result) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
-        <h2 className="text-xl font-bold mb-4 text-slate-300">Result not found</h2>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center text-slate-900 dark:text-white transition-colors">
+        <h2 className="text-xl font-bold mb-4 text-slate-700 dark:text-slate-300">Result not found</h2>
         <Button onClick={() => router.push("/dashboard/results")}>← Back to Results</Button>
       </div>
     );
@@ -128,7 +128,7 @@ export default function ResultDetailPage() {
     .sort((a, b) => b.pct - a.pct);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white pb-20">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white pb-20 transition-colors">
       <Navbar />
 
       {/* Header Hero */}
@@ -138,7 +138,7 @@ export default function ResultDetailPage() {
         <div className="relative max-w-6xl mx-auto">
           <button
             onClick={() => router.push("/dashboard/results")}
-            className="flex items-center gap-2 text-slate-400 hover:text-white font-bold mb-8 transition-colors text-sm"
+            className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold mb-8 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Results
           </button>
@@ -170,19 +170,19 @@ export default function ResultDetailPage() {
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2 leading-tight">
                 {result.examId?.title || "Result Analysis"}
               </h1>
-              <p className="text-slate-400 mb-5">
-                {result.examId?.category && <span className="text-primary-400 font-bold mr-2">{result.examId.category}</span>}
+              <p className="text-slate-600 dark:text-slate-400 mb-5">
+                {result.examId?.category && <span className="text-primary-600 dark:text-primary-400 font-bold mr-2">{result.examId.category}</span>}
                 {formatDate(result.submittedAt)}
               </p>
 
               {/* Quick stats row */}
               <div className="flex flex-wrap gap-3">
                 {[
-                  { icon: CheckCircle2, label: `${correctCount} Correct`,    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
-                  { icon: XCircle,      label: `${wrongCount} Wrong`,        color: "text-red-400 bg-red-500/10 border-red-500/20" },
-                  { icon: SkipForward,  label: `${skippedCount} Skipped`,    color: "text-slate-400 bg-slate-800 border-slate-700" },
-                  { icon: Clock,        label: formatTime(result.timeTakenSeconds), color: "text-slate-300 bg-slate-800 border-slate-700" },
-                  { icon: Target,       label: `${result.score}/${result.totalQuestions} Score`, color: "text-primary-400 bg-primary-500/10 border-primary-500/20" },
+                  { icon: CheckCircle2, label: `${correctCount} Correct`,    color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20" },
+                  { icon: XCircle,      label: `${wrongCount} Wrong`,        color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20" },
+                  { icon: SkipForward,  label: `${skippedCount} Skipped`,    color: "text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700" },
+                  { icon: Clock,        label: formatTime(result.timeTakenSeconds), color: "text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700" },
+                  { icon: Target,       label: `${result.score}/${result.totalQuestions} Score`, color: "text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-500/10 border-primary-200 dark:border-primary-500/20" },
                 ].map((s, i) => (
                   <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-bold ${s.color}`}>
                     <s.icon className="w-4 h-4" /> {s.label}
@@ -201,14 +201,14 @@ export default function ResultDetailPage() {
           {result.weakTopics?.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="rounded-2xl bg-slate-900 border border-red-500/20 p-6 flex flex-col"
+              className="rounded-2xl bg-white dark:bg-slate-900 border border-red-200 dark:border-red-500/20 p-6 flex flex-col shadow-sm dark:shadow-none"
             >
-              <h2 className="font-bold text-white flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-5 h-5 text-red-400" /> Topics to Revise
+              <h2 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
+                <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400" /> Topics to Revise
               </h2>
               <div className="flex flex-wrap gap-2">
                 {result.weakTopics.map((t: string, i: number) => (
-                  <span key={i} className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold">
+                  <span key={i} className="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold">
                     {t}
                   </span>
                 ))}
@@ -219,19 +219,19 @@ export default function ResultDetailPage() {
           {topics.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-              className="rounded-2xl bg-slate-900 border border-slate-800 p-6 flex flex-col"
+              className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col shadow-sm dark:shadow-none"
             >
-              <h2 className="font-bold text-white flex items-center gap-2 mb-4">
-                <BarChart2 className="w-5 h-5 text-primary-400" /> Subject Performance
+              <h2 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
+                <BarChart2 className="w-5 h-5 text-primary-500 dark:text-primary-400" /> Subject Performance
               </h2>
               <div className="space-y-4">
                 {topics.slice(0, 4).map((t, i) => (
                   <div key={i}>
                     <div className="flex justify-between text-xs font-bold mb-1.5">
-                      <span className="text-slate-300">{t.name}</span>
-                      <span className={t.pct >= 50 ? "text-emerald-400" : "text-amber-400"}>{t.pct}%</span>
+                      <span className="text-slate-600 dark:text-slate-300">{t.name}</span>
+                      <span className={t.pct >= 50 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>{t.pct}%</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex">
                       <div className={`h-full rounded-full transition-all duration-1000 ${t.pct >= 75 ? "bg-emerald-500" : t.pct >= 50 ? "bg-primary-500" : "bg-amber-500"}`} style={{ width: `${t.pct}%` }} />
                     </div>
                   </div>
@@ -247,7 +247,7 @@ export default function ResultDetailPage() {
           className="grid grid-cols-1 lg:grid-cols-4 gap-6"
         >
           {/* Question Palette */}
-          <div className="lg:col-span-1 rounded-2xl bg-slate-900 border border-slate-800 p-5 h-fit">
+          <div className="lg:col-span-1 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 h-fit shadow-sm dark:shadow-none">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
               <BarChart2 className="w-4 h-4" /> Questions
             </h3>
@@ -258,38 +258,38 @@ export default function ResultDetailPage() {
                   onClick={() => setActiveQ(idx)}
                   className={`aspect-square rounded-xl border-2 flex items-center justify-center text-xs font-bold transition-all hover:scale-110 ${
                     ans.selectedOption === -1
-                      ? "bg-slate-800 text-slate-400 border-slate-700"
+                      ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
                       : ans.isCorrect
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                        : "bg-red-500/10 text-red-400 border-red-500/30"
-                  } ${activeQ === idx ? "ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110" : ""}`}
+                        ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30"
+                        : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30"
+                  } ${activeQ === idx ? "ring-2 ring-primary-500 dark:ring-white ring-offset-2 ring-offset-white dark:ring-offset-slate-900 scale-110" : ""}`}
                 >
                   {idx + 1}
                 </button>
               ))}
             </div>
             {/* Legend */}
-            <div className="mt-4 pt-4 border-t border-slate-800 space-y-1.5 text-xs text-slate-500">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500/30" /> Correct</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-red-500/30 border border-red-500/30" /> Incorrect</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-800 border border-slate-700" /> Skipped</div>
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-1.5 text-xs text-slate-600 dark:text-slate-500">
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-100 dark:bg-emerald-500/30 border border-emerald-200 dark:border-emerald-500/30" /> Correct</div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-red-100 dark:bg-red-500/30 border border-red-200 dark:border-red-500/30" /> Incorrect</div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" /> Skipped</div>
             </div>
           </div>
 
           {/* Question Detail */}
-          <div className="lg:col-span-3 rounded-2xl bg-slate-900 border border-slate-800 p-6 lg:p-8 flex flex-col">
+          <div className="lg:col-span-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 lg:p-8 flex flex-col shadow-sm dark:shadow-none">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-lg">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
                   Question {activeQ + 1} of {result.answers.length}
                 </span>
                 {currentAnswer && (
                   <span className={`text-xs font-bold px-3 py-1 rounded-lg border ${
                     currentAnswer.selectedOption === -1
-                      ? "bg-slate-800 text-slate-400 border-slate-700"
+                      ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
                       : currentAnswer.isCorrect
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                        : "bg-red-500/10 text-red-400 border-red-500/30"
+                        ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30"
+                        : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30"
                   }`}>
                     {currentAnswer.selectedOption === -1 ? "Skipped" : currentAnswer.isCorrect ? "✓ Correct" : "✗ Incorrect"}
                   </span>
@@ -302,8 +302,8 @@ export default function ResultDetailPage() {
                   disabled={isBookmarking}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-sm font-bold ${
                     bookmarks[question._id]
-                      ? "bg-primary-500/10 text-primary-400 border-primary-500/30 hover:bg-primary-500/20"
-                      : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:border-slate-600"
+                      ? "bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-500/30 hover:bg-primary-100 dark:hover:bg-primary-500/20"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600"
                   }`}
                 >
                   <Bookmark className={`w-4 h-4 ${bookmarks[question._id] ? "fill-primary-400" : ""}`} />
@@ -324,16 +324,16 @@ export default function ResultDetailPage() {
                   transition={{ duration: 0.18 }}
                   className="flex-1 flex flex-col"
                 >
-                  <h3 className="text-lg font-semibold text-white mb-6 leading-relaxed">{question.text}</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6 leading-relaxed">{question.text}</h3>
 
                   <div className="space-y-3 mb-8">
                     {question.options.map((opt: string, oIdx: number) => {
                       const isSelected = currentAnswer.selectedOption === oIdx;
                       const isCorrect = question.correctAnswer === oIdx;
 
-                      let style = "border-slate-700 bg-slate-800/50 text-slate-400";
-                      if (isCorrect) style = "border-emerald-500 bg-emerald-500/10 text-emerald-100";
-                      else if (isSelected && !isCorrect) style = "border-red-500 bg-red-500/10 text-red-100";
+                      let style = "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400";
+                      if (isCorrect) style = "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-100";
+                      else if (isSelected && !isCorrect) style = "border-red-500 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-100";
 
                       return (
                         <div key={oIdx} className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${style}`}>
@@ -371,19 +371,19 @@ export default function ResultDetailPage() {
             </AnimatePresence>
 
             {/* Navigation */}
-            <div className="mt-8 pt-5 border-t border-slate-800 flex items-center justify-between">
+            <div className="mt-8 pt-5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <button
                 onClick={() => setActiveQ(p => p - 1)}
                 disabled={activeQ === 0}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-4 h-4" /> Previous
               </button>
-              <span className="text-xs text-slate-600">{activeQ + 1} / {result.answers.length}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-600">{activeQ + 1} / {result.answers.length}</span>
               <button
                 onClick={() => setActiveQ(p => p + 1)}
                 disabled={activeQ === result.answers.length - 1}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 Next <ChevronRight className="w-4 h-4" />
               </button>
@@ -395,7 +395,7 @@ export default function ResultDetailPage() {
         <div className="text-center pt-4">
           <Link
             href="/dashboard/results"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-primary-500/50 text-slate-300 hover:text-white font-bold text-sm transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary-500/50 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-sm transition-all"
           >
             <ArrowLeft className="w-4 h-4" /> All My Results
           </Link>
