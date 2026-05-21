@@ -226,16 +226,61 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
 // ─── Bulk Upload Modal ─────────────────────────────────────────────────────────
 function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: () => void, onSaved: () => void }) {
   const [examId, setExamId] = useState("");
-  const [json, setJson] = useState("");
+  const [csvText, setCsvText] = useState("");
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
 
+  const parseCSV = (text: string) => {
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    if (lines.length < 2) throw new Error("CSV must have a header row and at least one data row.");
+    
+    // Simple robust regex for CSV that respects double quotes
+    const parsedData = lines.slice(1).map((line, rowIndex) => {
+      const regex = /(?:"([^"]*(?:""[^"]*)*)"|([^,]*))(?:,|$)/g;
+      let match;
+      const values = [];
+      while ((match = regex.exec(line)) !== null && match[0] !== '') {
+        values.push(match[1] ? match[1].replace(/""/g, '"') : match[2]);
+      }
+      
+      if (values.length < 6) return null; // Invalid line
+
+      const text = values[0]?.trim();
+      const options = [values[1]?.trim(), values[2]?.trim(), values[3]?.trim(), values[4]?.trim()];
+      const correctVal = values[5]?.trim().toUpperCase();
+      const explanation = values[6]?.trim() || "";
+
+      const ansMap: Record<string, number> = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+      const correctAnswer = ansMap[correctVal] ?? 0;
+
+      if (!text || options.some(o => !o)) {
+        throw new Error(`Row ${rowIndex + 2} is missing question text or options.`);
+      }
+
+      return {
+        text,
+        options,
+        correctAnswer,
+        explanation,
+        difficulty: "medium",
+        topic: ""
+      };
+    }).filter(Boolean);
+
+    if (parsedData.length === 0) throw new Error("No valid questions found in CSV.");
+    return parsedData;
+  };
+
   const handleUpload = async () => {
     if (!examId) { setError("Select an exam first."); return; }
     let parsed;
-    try { parsed = JSON.parse(json); } catch { setError("Invalid JSON format."); return; }
-    if (!Array.isArray(parsed)) { setError("JSON must be an array of questions."); return; }
+    try { 
+      parsed = parseCSV(csvText); 
+    } catch (err: any) { 
+      setError(err.message || "Invalid CSV format."); 
+      return; 
+    }
     setUploading(true); setError(""); setResult("");
     try {
       const questions = parsed.map((q: any) => ({ ...q, examId }));
@@ -254,16 +299,9 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
     }
   };
 
-  const sampleJson = `[
-  {
-    "text": "Which organ produces insulin?",
-    "options": ["Liver", "Kidney", "Pancreas", "Spleen"],
-    "correctAnswer": 2,
-    "explanation": "Pancreas produces insulin via beta cells.",
-    "difficulty": "easy",
-    "topic": "Endocrinology"
-  }
-]`;
+  const sampleCsv = `Question,Option_A,Option_B,Option_C,Option_D,Correct_Answer,Explanation
+Dental arch ka cornerstone kis daant ko kaha jata hai?,Incisor,Canine,Premolar,Molar,B,Canines sabse strong aur longest roots wale teeth hote hain.
+Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central incisor,Mandibular central incisor,Mandibular first molar,Maxillary canine,B,Mandibular central incisor pehle erupt hota hai.`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -275,7 +313,7 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2"><Upload className="w-5 h-5 text-primary-400" /> Bulk Upload MCQs</h2>
-            <p className="text-slate-400 text-sm">Paste JSON array of questions below.</p>
+            <p className="text-slate-400 text-sm">Paste CSV data (Question, Opt A, Opt B, Opt C, Opt D, Answer, Explanation).</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X className="w-5 h-5" /></button>
         </div>
@@ -299,18 +337,18 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">JSON Data</label>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">CSV Data</label>
             <textarea
-              value={json} onChange={e => setJson(e.target.value)}
+              value={csvText} onChange={e => setCsvText(e.target.value)}
               rows={10}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-green-300 text-sm font-mono focus:outline-none focus:border-primary-500 resize-none"
-              placeholder={sampleJson}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-green-300 text-sm font-mono focus:outline-none focus:border-primary-500 resize-none whitespace-pre"
+              placeholder={sampleCsv}
             />
           </div>
 
           <div className="flex gap-3">
-            <button onClick={() => setJson(sampleJson)} className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:bg-slate-800 text-sm transition-colors">
-              Load Sample
+            <button onClick={() => setCsvText(sampleCsv)} className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:bg-slate-800 text-sm transition-colors">
+              Load Sample CSV
             </button>
             <button
               onClick={handleUpload} disabled={uploading}
