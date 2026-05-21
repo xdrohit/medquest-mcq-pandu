@@ -13,59 +13,49 @@ import { Button } from "@/components/ui/Button";
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState<"available" | "analytics">("available");
   const [exams, setExams] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  // Separate states so name shows INSTANTLY from JWT, stats come later
+  const [authUser, setAuthUser] = useState<{ name: string; role: string } | null>(null);
+  const [stats, setStats] = useState<any | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const timestamp = Date.now();
-        const [examsRes, profileRes] = await Promise.all([
-          fetch(`/api/exams?t=${timestamp}`, { cache: "no-store" }),
-          fetch(`/api/user/profile?t=${timestamp}`, { cache: "no-store" })
-        ]);
+    const ts = Date.now();
 
-        if (examsRes.ok) {
-          const data = await examsRes.json();
-          setExams(Array.isArray(data) ? data : []);
-        }
+    // ── STEP 1: Instant auth (JWT decode, no DB) ──────────────────────────
+    fetch("/api/auth/me")
+      .then(r => r.json())
+      .then(d => { if (d?.user) setAuthUser(d.user); })
+      .catch(() => {});
 
+    // ── STEP 2 & 3: Stats + Exams in parallel (DB calls) ─────────────────
+    Promise.all([
+      fetch(`/api/user/profile?t=${ts}`, { cache: "no-store" }),
+      fetch(`/api/exams?t=${ts}`, { cache: "no-store" }),
+    ])
+      .then(async ([profileRes, examsRes]) => {
         if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          setUser(profileData?.user || {});
-          setStats(profileData?.stats || {});
+          const pd = await profileRes.json();
+          setStats(pd?.stats ?? {});
+          // Also update name from DB in case JWT is slightly stale
+          if (pd?.user?.name) setAuthUser(prev => ({ ...prev!, name: pd.user.name }));
         } else {
-          // Even on error, set empty objects so we show 0s not dots
-          setUser({});
           setStats({});
         }
-      } catch (err) {
-        console.error("Error fetching dashboard data:", err);
-        setUser({});
-        setStats({});
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+        if (examsRes.ok) {
+          const ed = await examsRes.json();
+          setExams(Array.isArray(ed) ? ed : []);
+        }
+      })
+      .catch(() => setStats({}))
+      .finally(() => setStatsLoading(false));
   }, []);
 
-  // Show spinner while loading
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center transition-colors duration-300">
-        <div className="w-16 h-16 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mb-4" />
-        <h2 className="text-xl font-bold text-slate-700 dark:text-slate-300 animate-pulse">Loading Dashboard...</h2>
-      </div>
-    );
-  }
-
-  // Values - always defined after loading (never null)
-  const totalExams     = stats?.totalExams   ?? 0;
-  const avgScore       = stats?.averageScore ?? 0;
-  const weakTopics: string[]  = stats?.topWeakTopics  ?? [];
-  const recentResults: any[]  = stats?.recentResults  ?? [];
+  // Pre-compute values (always safe after statsLoading=false)
+  const totalExams    = stats?.totalExams   ?? 0;
+  const avgScore      = stats?.averageScore ?? 0;
+  const weakTopics: string[] = stats?.topWeakTopics ?? [];
+  const recentResults: any[] = stats?.recentResults  ?? [];
+  const firstName = authUser?.name?.split(" ")[0] || "Student";
 
 
   return (
@@ -86,7 +76,7 @@ export default function StudentDashboard() {
             <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary-500/10 dark:bg-primary-500/20 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10">
               <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">
-                Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500">{user?.name?.split(' ')[0] || 'Student'}</span>
+                Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500">{firstName}</span>
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md">Your AI medical training program is ready. Continue practicing to dominate your exams.</p>
               
@@ -115,7 +105,7 @@ export default function StudentDashboard() {
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mb-2" />
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                {totalExams}
+                {statsLoading ? <span className="inline-block w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" /> : totalExams}
               </div>
               <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Tests Completed</div>
             </div>
@@ -124,7 +114,7 @@ export default function StudentDashboard() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <Target className="w-8 h-8 text-primary-500 mb-2" />
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                {avgScore}%
+                {statsLoading ? <span className="inline-block w-12 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" /> : `${avgScore}%`}
               </div>
               <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Avg Score</div>
             </div>
@@ -197,7 +187,7 @@ export default function StudentDashboard() {
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Average Score</h3>
                 </div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white">
-                  {avgScore}%
+                  {statsLoading ? <span className="inline-block w-20 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" /> : `${avgScore}%`}
                 </div>
               </div>
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
@@ -206,7 +196,7 @@ export default function StudentDashboard() {
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Tests Completed</h3>
                 </div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white">
-                  {totalExams}
+                  {statsLoading ? <span className="inline-block w-12 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" /> : totalExams}
                 </div>
               </div>
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
