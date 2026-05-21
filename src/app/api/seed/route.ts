@@ -7,11 +7,16 @@ import bcrypt from 'bcrypt';
 
 export async function GET() {
   try {
+    // SECURITY FIX: Disable automatic deletion to protect user data
+    if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ message: "Seed disabled in production for data safety." }, { status: 403 });
+    }
+
     await dbConnect();
 
-    // Clean existing data
-    await Exam.deleteMany({});
-    await Question.deleteMany({});
+    // Prevent accidental deletion of future admin questions
+    // await Exam.deleteMany({});
+    // await Question.deleteMany({});
 
     // Seed Master Admin User
     const adminExists = await User.findOne({ email: 'rohithubhai3@gmail.com' });
