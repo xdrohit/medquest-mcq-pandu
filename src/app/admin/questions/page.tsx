@@ -385,12 +385,20 @@ export default function AdminQuestionsPage() {
     if (filterDiff) params.set("difficulty", filterDiff);
     if (search) params.set("search", search);
     const timestamp = Date.now();
-    const [qRes, eRes] = await Promise.all([
-      fetch(`/api/admin/questions?${params}&t=${timestamp}`, { cache: "no-store" }),
-      fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }),
-    ]);
-    setQuestions(await qRes.json());
-    setExams(await eRes.json());
+    try {
+      const [qRes, eRes] = await Promise.all([
+        fetch(`/api/admin/questions?${params}&t=${timestamp}`, { cache: "no-store" }),
+        fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }),
+      ]);
+      const qData = await qRes.json();
+      const eData = await eRes.json();
+      setQuestions(Array.isArray(qData) ? qData : []);
+      setExams(Array.isArray(eData) ? eData : []);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setQuestions([]);
+      setExams([]);
+    }
     setLoading(false);
   }, [filterExam, filterDiff, search]);
 

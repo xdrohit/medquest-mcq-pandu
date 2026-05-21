@@ -31,10 +31,14 @@ export default function AdminStudentsPage() {
       const timestamp = Date.now();
       const res = await fetch(`/api/admin/users?t=${timestamp}`, { cache: "no-store" });
       if (res.ok) {
-        setStudents(await res.json());
+        const data = await res.json();
+        setStudents(Array.isArray(data) ? data : []);
+      } else {
+        setStudents([]);
       }
     } catch (err) {
       console.error("Error fetching users:", err);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
