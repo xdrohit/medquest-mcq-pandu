@@ -16,11 +16,9 @@ export default function AdminPaymentsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-900 p-8 text-slate-100">
       <div className="max-w-7xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
           <div>
-            <Link href="/admin" className="text-primary-400 hover:text-primary-300 text-sm mb-2 inline-block">← Back to Dashboard</Link>
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <CreditCard className="text-green-500" /> Payment History
             </h1>
@@ -86,6 +84,5 @@ export default function AdminPaymentsPage() {
           </div>
         </GlassCard>
       </div>
-    </main>
   );
 }

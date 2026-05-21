@@ -11,71 +11,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/questions", label: "MCQ Manager", icon: BookOpen },
-  { href: "/admin/tests", label: "Test Management", icon: ClipboardList },
-  { href: "/admin/students", label: "Students", icon: Users },
-  { href: "/admin/payments", label: "Payments", icon: CreditCard },
-];
 
-function AdminSidebar({ onLogout }: { onLogout: () => void }) {
-  const pathname = usePathname();
-  return (
-    <aside className="w-64 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col fixed left-0 top-0 z-40 transition-colors duration-300">
-      {/* Logo */}
-      <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <Activity className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <span className="text-slate-900 dark:text-white font-bold text-lg leading-none transition-colors">Daily Dose MCQ</span>
-            <p className="text-xs text-primary-600 dark:text-primary-400 font-semibold mt-0.5 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3" /> Admin Panel
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <p className="text-xs font-bold text-slate-500 dark:text-slate-600 uppercase tracking-widest px-3 mb-3">Navigation</p>
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
-          return (
-            <Link key={href} href={href}>
-              <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group ${
-                isActive
-                  ? "bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20 shadow-sm dark:shadow-none"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}>
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-primary-600 dark:text-primary-400" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300"}`} />
-                {label}
-                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500 dark:bg-primary-400" />}
-              </div>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Bottom */}
-      <div className="px-3 py-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-        <div className="px-3 flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Theme</span>
-          <ThemeToggle />
-        </div>
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
-        >
-          <LogOut className="w-4 h-4" />
-          Sign Out
-        </button>
-      </div>
-    </aside>
-  );
-}
 
 export default function AdminDashboard() {
   const [exams, setExams] = useState<any[]>([]);
@@ -115,12 +51,8 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      <AdminSidebar onLogout={handleLogout} />
-
-      {/* Main Content */}
-      <main className="ml-64 flex-1 p-8 overflow-y-auto">
-        {/* Top Bar */}
+    <div className="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950">
+      {/* Top Bar */}
         <div className="flex items-center justify-between mb-10">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold mb-1">Admin Control Center</p>
@@ -207,47 +139,48 @@ export default function AdminDashboard() {
                 </Link>
               </div>
             ) : (
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-transparent">
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Exam</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Questions</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {exams.slice(0, 6).map((exam: any, i: number) => (
-                    <motion.tr key={exam._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }} className="border-b border-slate-100 dark:border-slate-800/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="font-semibold text-slate-900 dark:text-white text-sm">{exam.title}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{exam.durationMinutes}m duration</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs bg-primary-50 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400 px-2.5 py-1 rounded-lg border border-primary-100 dark:border-primary-500/20 font-medium">{exam.category}</span>
-                      </td>
-                      <td className="px-6 py-4 text-slate-700 dark:text-slate-300 text-sm font-semibold">{exam.questionCount ?? 0}</td>
-                      <td className="px-6 py-4">
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
-                          exam.status === "published" ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20"
-                          : exam.status === "scheduled" ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/20"
-                          : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600"
-                        }`}>
-                          {exam.status === "published" ? "● Published" : exam.status === "scheduled" ? "◷ Scheduled" : "○ Draft"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Link href="/admin/questions" className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors">Manage MCQs →</Link>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-transparent">
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Exam</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Questions</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {exams.slice(0, 6).map((exam: any, i: number) => (
+                      <motion.tr key={exam._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }} className="border-b border-slate-100 dark:border-slate-800/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-slate-900 dark:text-white text-sm whitespace-nowrap">{exam.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{exam.durationMinutes}m duration</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-xs bg-primary-50 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400 px-2.5 py-1 rounded-lg border border-primary-100 dark:border-primary-500/20 font-medium whitespace-nowrap">{exam.category}</span>
+                        </td>
+                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300 text-sm font-semibold">{exam.questionCount ?? 0}</td>
+                        <td className="px-6 py-4">
+                          <span className={`text-xs px-2.5 py-1 rounded-full font-bold border whitespace-nowrap ${
+                            exam.status === "published" ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20"
+                            : exam.status === "scheduled" ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/20"
+                            : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600"
+                          }`}>
+                            {exam.status === "published" ? "● Published" : exam.status === "scheduled" ? "◷ Scheduled" : "○ Draft"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Link href="/admin/questions" className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors whitespace-nowrap">Manage MCQs →</Link>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
-      </main>
     </div>
   );
 }

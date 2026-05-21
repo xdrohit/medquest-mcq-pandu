@@ -9,52 +9,7 @@ import {
   LogOut, Activity, ShieldCheck, Search, Edit2, Trash2, Plus, X, AlertCircle
 } from "lucide-react";
 
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/questions", label: "MCQ Manager", icon: BookOpen },
-  { href: "/admin/tests", label: "Test Management", icon: ClipboardList },
-  { href: "/admin/students", label: "Students", icon: Users },
-  { href: "/admin/payments", label: "Payments", icon: CreditCard },
-];
 
-function AdminSidebar({ onLogout }: { onLogout: () => void }) {
-  const pathname = usePathname();
-  return (
-    <aside className="w-64 h-screen bg-slate-900 border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40">
-      <div className="px-6 py-5 border-b border-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <Activity className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <span className="text-white font-bold text-lg leading-none">Daily Dose MCQ</span>
-            <p className="text-xs text-primary-400 font-semibold mt-0.5 flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Admin Panel</p>
-          </div>
-        </div>
-      </div>
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <p className="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-3">Navigation</p>
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
-          return (
-            <Link key={href} href={href}>
-              <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer group ${isActive ? "bg-primary-500/15 text-primary-400 border border-primary-500/20" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-primary-400" : "text-slate-500 group-hover:text-slate-300"}`} />
-                {label}
-                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-400" />}
-              </div>
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="px-3 py-4 border-t border-slate-800">
-        <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
-          <LogOut className="w-4 h-4" /> Sign Out
-        </button>
-      </div>
-    </aside>
-  );
-}
 
 export default function AdminStudentsPage() {
   const [search, setSearch] = useState("");
@@ -124,9 +79,7 @@ export default function AdminStudentsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100">
-      <AdminSidebar onLogout={handleLogout} />
-
+    <div className="flex-1 p-4 md:p-8">
       <AnimatePresence>
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -168,7 +121,7 @@ export default function AdminStudentsPage() {
         )}
       </AnimatePresence>
 
-      <main className="ml-64 flex-1 p-8">
+
         <div className="mb-8 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Admin</p>
@@ -197,7 +150,8 @@ export default function AdminStudentsPage() {
 
         {/* Table */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          <table className="w-full text-left">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left whitespace-nowrap min-w-[800px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-800/40">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Student</th>
@@ -250,9 +204,9 @@ export default function AdminStudentsPage() {
                 </motion.tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
-      </main>
     </div>
   );
 }

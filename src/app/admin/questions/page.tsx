@@ -378,7 +378,7 @@ export default function AdminQuestionsPage() {
   const openEdit = (q: any) => { setEditQuestion(q); setModalMode("edit"); };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex-1">
       <AnimatePresence>
         {(modalMode === "add" || modalMode === "edit") && (
           <QuestionModal
@@ -394,13 +394,10 @@ export default function AdminQuestionsPage() {
       </AnimatePresence>
 
       {/* Top Header */}
-      <div className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-8 py-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Link href="/admin" className="text-slate-400 hover:text-white transition-colors text-sm flex items-center gap-1">← Dashboard</Link>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <BookOpen className="text-primary-400 w-6 h-6" /> MCQ Management
-          </h1>
-        </div>
+      <div className="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <BookOpen className="text-primary-400 w-6 h-6" /> MCQ Management
+        </h1>
         <div className="flex items-center gap-3">
           <button onClick={() => setBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-sm font-medium transition-colors">
             <Upload className="w-4 h-4" /> Bulk Upload
@@ -447,7 +444,7 @@ export default function AdminQuestionsPage() {
         {/* Questions Table */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-800/50">
                   <th className="p-4 w-10">
@@ -520,6 +517,6 @@ export default function AdminQuestionsPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
