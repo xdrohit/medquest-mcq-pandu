@@ -81,7 +81,11 @@ export default function StudentDashboard() {
               <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md">Your AI medical training program is ready. Continue practicing to dominate your exams.</p>
               
               <div className="flex flex-wrap gap-4">
-                {exams.length > 0 ? (
+                {statsLoading ? (
+                  <Button variant="primary" disabled className="rounded-xl px-6 py-3 font-bold opacity-70 cursor-wait">
+                    Loading... <span className="ml-2 w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                  </Button>
+                ) : exams.length > 0 ? (
                   <Link href={`/exam/${exams[0]._id}`}>
                     <Button variant="primary" className="shadow-lg shadow-primary-500/20 rounded-xl px-6 py-3 font-bold">
                       Resume Training <Play className="w-4 h-4 ml-2 fill-current" />
@@ -140,7 +144,20 @@ export default function StudentDashboard() {
         {/* Available Tests Grid */}
         {activeTab === "available" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {exams.length === 0 ? (
+            {statsLoading ? (
+              // Skeleton Loaders
+              [1, 2, 3].map((n) => (
+                <div key={n} className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col h-full shadow-sm dark:shadow-none animate-pulse">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="w-20 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                    <div className="w-16 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                  </div>
+                  <div className="w-3/4 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg mb-4" />
+                  <div className="w-full h-16 bg-slate-200 dark:bg-slate-800 rounded-lg mb-8" />
+                  <div className="w-full h-12 bg-slate-200 dark:bg-slate-800 rounded-xl mt-auto" />
+                </div>
+              ))
+            ) : exams.length === 0 ? (
               <div className="col-span-full py-20 text-center">
                 <BookOpen className="w-12 h-12 text-slate-400 dark:text-slate-700 mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-slate-500 dark:text-slate-400">No active tests found</h3>
