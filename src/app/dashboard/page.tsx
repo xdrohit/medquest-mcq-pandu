@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
-  Play, BookOpen, Activity, Target, Flame, Zap, 
+  Play, BookOpen, Activity, Target,
   ChevronRight, Trophy, TrendingUp, AlertTriangle, CheckCircle2, Clock 
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/Button";
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState<"available" | "analytics">("available");
   const [exams, setExams] = useState<any[]>([]);
-  const [profile, setProfile] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,12 +25,25 @@ export default function StudentDashboard() {
           fetch(`/api/exams?t=${timestamp}`, { cache: "no-store" }),
           fetch(`/api/user/profile?t=${timestamp}`, { cache: "no-store" })
         ]);
-        
-        if (examsRes.ok) setExams(await examsRes.json());
-        if (profileRes.ok) setProfile(await profileRes.json());
-        
+
+        if (examsRes.ok) {
+          const data = await examsRes.json();
+          setExams(Array.isArray(data) ? data : []);
+        }
+
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          setUser(profileData?.user || {});
+          setStats(profileData?.stats || {});
+        } else {
+          // Even on error, set empty objects so we show 0s not dots
+          setUser({});
+          setStats({});
+        }
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
+        setUser({});
+        setStats({});
       } finally {
         setLoading(false);
       }
@@ -37,16 +51,22 @@ export default function StudentDashboard() {
     fetchData();
   }, []);
 
+  // Show spinner while loading
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center transition-colors duration-300">
         <div className="w-16 h-16 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin mb-4" />
-        <h2 className="text-xl font-bold text-slate-700 dark:text-slate-300 animate-pulse">Loading AI Interface...</h2>
+        <h2 className="text-xl font-bold text-slate-700 dark:text-slate-300 animate-pulse">Loading Dashboard...</h2>
       </div>
     );
   }
 
-  const { user, stats } = profile || { user: {}, stats: {} };
+  // Values - always defined after loading (never null)
+  const totalExams     = stats?.totalExams   ?? 0;
+  const avgScore       = stats?.averageScore ?? 0;
+  const weakTopics: string[]  = stats?.topWeakTopics  ?? [];
+  const recentResults: any[]  = stats?.recentResults  ?? [];
+
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pt-20 pb-12 overflow-hidden selection:bg-primary-500/30 transition-colors duration-300">
@@ -95,7 +115,7 @@ export default function StudentDashboard() {
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mb-2" />
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                {profile ? (stats?.totalExams || 0) : <span className="animate-pulse text-slate-300">...</span>}
+                {totalExams}
               </div>
               <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Tests Completed</div>
             </div>
@@ -104,7 +124,7 @@ export default function StudentDashboard() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <Target className="w-8 h-8 text-primary-500 mb-2" />
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                {profile ? `${stats?.averageScore || 0}%` : <span className="animate-pulse text-slate-300">...</span>}
+                {avgScore}%
               </div>
               <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Avg Score</div>
             </div>
@@ -177,7 +197,7 @@ export default function StudentDashboard() {
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Average Score</h3>
                 </div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white">
-                  {profile ? `${stats?.averageScore || 0}%` : <span className="animate-pulse text-slate-300">...</span>}
+                  {avgScore}%
                 </div>
               </div>
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
@@ -186,7 +206,7 @@ export default function StudentDashboard() {
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Tests Completed</h3>
                 </div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white">
-                  {profile ? (stats?.totalExams || 0) : <span className="animate-pulse text-slate-300">...</span>}
+                  {totalExams}
                 </div>
               </div>
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
@@ -195,7 +215,7 @@ export default function StudentDashboard() {
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Global Rank</h3>
                 </div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white">
-                  {profile ? "#42" : <span className="animate-pulse text-slate-300">...</span>}
+                  #42
                 </div>
                 <p className="text-xs text-slate-500 mt-1">Top 5% of students</p>
               </div>
@@ -212,9 +232,9 @@ export default function StudentDashboard() {
                   </div>
                 </div>
                 
-                {stats?.topWeakTopics?.length > 0 ? (
+                {weakTopics.length > 0 ? (
                   <div className="space-y-3">
-                    {stats.topWeakTopics.map((topic: string, i: number) => (
+                    {weakTopics.map((topic: string, i: number) => (
                       <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
                         <span className="font-semibold text-slate-700 dark:text-slate-200">{topic}</span>
                         <Button variant="ghost" className="h-8 px-3 text-xs border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Practice</Button>
@@ -235,9 +255,9 @@ export default function StudentDashboard() {
                   <Activity className="w-5 h-5 text-primary-600 dark:text-primary-400" /> Recent Battles
                 </h3>
                 
-                {stats?.recentResults?.length > 0 ? (
+                {recentResults.length > 0 ? (
                   <div className="space-y-4">
-                    {stats.recentResults.map((result: any, i: number) => (
+                    {recentResults.map((result: any, i: number) => (
                       <Link key={result._id} href={`/dashboard/results/${result._id}`}>
                         <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary-500/50 transition-all cursor-pointer group">
                           <div>
@@ -248,7 +268,7 @@ export default function StudentDashboard() {
                             <div className="font-black text-lg text-slate-900 dark:text-white">
                               {Math.round((result.score / result.totalQuestions) * 100)}%
                             </div>
-                            <div className="text-xs font-bold text-accent-600 dark:text-accent-400">+{result.xpEarned || 0} XP</div>
+                            <div className="text-xs font-bold text-slate-500">{result.score}/{result.totalQuestions} correct</div>
                           </div>
                         </div>
                       </Link>
