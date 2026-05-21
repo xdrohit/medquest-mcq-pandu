@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Result from '@/models/Result';
-import Exam from '@/models/Exam'; // ← CRITICAL: must import so Mongoose registers the model for populate()
+import Exam from '@/models/Exam'; // CRITICAL: must import so Mongoose registers the model for populate()
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 
@@ -15,18 +15,20 @@ export async function GET() {
     const token = cookieStore.get('token')?.value;
 
     if (!token) {
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json({ error: 'NO_TOKEN' }, { status: 401 });
     }
 
     let decoded: { userId: string };
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    } catch {
-      return NextResponse.json([], { status: 200 });
+    } catch (e: any) {
+      return NextResponse.json({ error: 'INVALID_TOKEN', details: e.message }, { status: 401 });
     }
 
     const userId = decoded.userId;
-    if (!userId) return NextResponse.json([], { status: 200 });
+    if (!userId) {
+      return NextResponse.json({ error: 'NO_USER_ID' }, { status: 401 });
+    }
 
     // Exam model must be imported (above) for populate to work in serverless
     const results = await Result.find({ userId })
@@ -37,8 +39,8 @@ export async function GET() {
     const safeResults = Array.isArray(results) ? results : [];
     return NextResponse.json(safeResults, { status: 200 });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching my results:', error);
-    return NextResponse.json([], { status: 200 });
+    return NextResponse.json({ error: 'FATAL_ERROR', message: error.message }, { status: 500 });
   }
 }
