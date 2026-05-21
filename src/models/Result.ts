@@ -13,7 +13,6 @@ const ResultSchema = new mongoose.Schema({
     timeSpentSeconds: { type: Number }
   }],
   weakTopics: [{ type: String }],
-  xpEarned: { type: Number, default: 0 },
   submittedAt: { type: Date, default: Date.now },
 });
 

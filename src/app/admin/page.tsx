@@ -19,9 +19,10 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timestamp = Date.now();
     Promise.all([
-      fetch("/api/exams?all=true").then(r => r.json()),
-      fetch("/api/admin/questions").then(r => r.json()),
+      fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }).then(r => r.json()),
+      fetch(`/api/admin/questions?t=${timestamp}`, { cache: "no-store" }).then(r => r.json()),
     ]).then(([examsData, questionsData]) => {
       const examList = Array.isArray(examsData) ? examsData : [];
       const qList = Array.isArray(questionsData) ? questionsData : [];

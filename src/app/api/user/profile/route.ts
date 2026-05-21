@@ -63,8 +63,6 @@ export async function GET() {
       user: {
         name: user.name,
         email: user.email,
-        xp: user.xp || 0,
-        streak: user.streak || 0,
         joined: user.createdAt,
       },
       stats: {

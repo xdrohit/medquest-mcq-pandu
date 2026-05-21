@@ -90,19 +90,23 @@ export default function StudentDashboard() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="grid grid-cols-2 gap-4 lg:flex lg:flex-col lg:gap-4"
           >
-            {/* XP Card */}
-            <div className="flex-1 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:border-accent-500/50 transition-colors shadow-sm dark:shadow-none">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Zap className="w-8 h-8 text-accent-500 dark:text-accent-400 mb-2" />
-              <div className="text-3xl font-black text-slate-900 dark:text-white">{user?.xp || 0}</div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Total XP</div>
+            {/* Tests Completed Card */}
+            <div className="flex-1 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:border-emerald-500/50 transition-colors shadow-sm dark:shadow-none">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mb-2" />
+              <div className="text-3xl font-black text-slate-900 dark:text-white">
+                {profile ? (stats?.totalExams || 0) : <span className="animate-pulse text-slate-300">...</span>}
+              </div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Tests Completed</div>
             </div>
-            {/* Streak Card */}
-            <div className="flex-1 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:border-orange-500/50 transition-colors shadow-sm dark:shadow-none">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Flame className="w-8 h-8 text-orange-500 mb-2" />
-              <div className="text-3xl font-black text-slate-900 dark:text-white">{user?.streak || 0}</div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Day Streak</div>
+            {/* Avg Score Card */}
+            <div className="flex-1 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:border-primary-500/50 transition-colors shadow-sm dark:shadow-none">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Target className="w-8 h-8 text-primary-500 mb-2" />
+              <div className="text-3xl font-black text-slate-900 dark:text-white">
+                {profile ? `${stats?.averageScore || 0}%` : <span className="animate-pulse text-slate-300">...</span>}
+              </div>
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Avg Score</div>
             </div>
           </motion.div>
         </div>
@@ -172,21 +176,27 @@ export default function StudentDashboard() {
                   <div className="p-2.5 rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400"><Target className="w-5 h-5" /></div>
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Average Score</h3>
                 </div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white">{stats?.averageScore || 0}%</div>
+                <div className="text-4xl font-black text-slate-900 dark:text-white">
+                  {profile ? `${stats?.averageScore || 0}%` : <span className="animate-pulse text-slate-300">...</span>}
+                </div>
               </div>
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"><CheckCircle2 className="w-5 h-5" /></div>
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Tests Completed</h3>
                 </div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white">{stats?.totalExams || 0}</div>
+                <div className="text-4xl font-black text-slate-900 dark:text-white">
+                  {profile ? (stats?.totalExams || 0) : <span className="animate-pulse text-slate-300">...</span>}
+                </div>
               </div>
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2.5 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400"><TrendingUp className="w-5 h-5" /></div>
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Global Rank</h3>
                 </div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white">#42</div>
+                <div className="text-4xl font-black text-slate-900 dark:text-white">
+                  {profile ? "#42" : <span className="animate-pulse text-slate-300">...</span>}
+                </div>
                 <p className="text-xs text-slate-500 mt-1">Top 5% of students</p>
               </div>
             </div>

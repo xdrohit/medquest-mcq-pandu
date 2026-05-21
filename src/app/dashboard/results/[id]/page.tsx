@@ -110,9 +110,6 @@ export default function ResultAnalyticsPage() {
               <p className="text-slate-600 dark:text-slate-400 mb-4">You scored {result.score} out of {result.totalQuestions} questions correctly.</p>
               
               <div className="flex gap-4">
-                <div className="flex items-center gap-2 text-sm font-bold text-accent-600 dark:text-accent-400 bg-accent-50 dark:bg-accent-500/10 px-4 py-2 rounded-xl border border-accent-100 dark:border-accent-500/20">
-                  <Zap className="w-4 h-4" /> +{result.xpEarned || 0} XP Earned
-                </div>
                 <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl">
                   <Clock className="w-4 h-4" /> {formatTime(result.timeTakenSeconds)}
                 </div>
@@ -190,7 +187,7 @@ export default function ResultAnalyticsPage() {
                     <span className={`text-xs font-bold px-3 py-1 rounded-lg border ${
                       currentAnswer.isCorrect ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30' : 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30'
                     }`}>
-                      {currentAnswer.isCorrect ? 'Correct (+10 XP)' : 'Incorrect'}
+                      {currentAnswer.isCorrect ? 'Correct' : 'Incorrect'}
                     </span>
                   </div>
 

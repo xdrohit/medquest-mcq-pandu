@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const xpEarned = score * 10; // 10 XP per correct answer
+
 
     const result = await Result.create({
       userId,
@@ -53,34 +53,17 @@ export async function POST(req: Request) {
       totalQuestions: data.answers.length,
       timeTakenSeconds: data.timeTakenSeconds,
       answers: detailedAnswers,
-      weakTopics: Array.from(weakTopicsSet),
-      xpEarned
+      weakTopics: Array.from(weakTopicsSet)
     });
 
-    // Update User XP and Streak
+    // Update User Last Active
     const user = await User.findById(userId);
     if (user) {
-      user.xp = (user.xp || 0) + xpEarned;
-      
-      // Streak logic
-      const now = new Date();
-      const lastActive = user.lastActiveDate;
-      if (!lastActive) {
-        user.streak = 1;
-      } else {
-        const diffTime = Math.abs(now.getTime() - lastActive.getTime());
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-        if (diffDays === 1) {
-          user.streak += 1; // Consecutive day
-        } else if (diffDays > 1) {
-          user.streak = 1; // Streak broken
-        }
-      }
-      user.lastActiveDate = now;
+      user.lastActiveDate = new Date();
       await user.save();
     }
 
-    return NextResponse.json({ resultId: result._id, xpEarned }, { status: 201 });
+    return NextResponse.json({ resultId: result._id }, { status: 201 });
   } catch (error) {
     console.error('Error submitting result:', error);
     return NextResponse.json({ message: 'Error submitting result' }, { status: 500 });
