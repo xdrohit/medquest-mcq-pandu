@@ -6,6 +6,14 @@ const ResultSchema = new mongoose.Schema({
   score: { type: Number, required: true },
   totalQuestions: { type: Number, required: true },
   timeTakenSeconds: { type: Number, required: true },
+  answers: [{
+    questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },
+    selectedOption: { type: Number },
+    isCorrect: { type: Boolean },
+    timeSpentSeconds: { type: Number }
+  }],
+  weakTopics: [{ type: String }],
+  xpEarned: { type: Number, default: 0 },
   submittedAt: { type: Date, default: Date.now },
 });
 

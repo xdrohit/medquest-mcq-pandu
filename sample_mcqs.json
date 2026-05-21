@@ -1,0 +1,142 @@
+[
+  {
+    "text": "A 45-year-old male presents with sudden onset of severe, tearing chest pain radiating to his back. His blood pressure is 180/110 mmHg. A chest X-ray reveals a widened mediastinum. What is the most likely diagnosis?",
+    "options": [
+      "Acute Myocardial Infarction",
+      "Aortic Dissection",
+      "Pulmonary Embolism",
+      "Pericarditis"
+    ],
+    "correctAnswer": 1,
+    "explanation": "The classic presentation of an aortic dissection is sudden, severe, tearing or ripping chest pain radiating to the back, often accompanied by hypertension and a widened mediastinum on chest X-ray.",
+    "difficulty": "medium",
+    "topic": "Cardiovascular System",
+    "tags": ["MBBS", "Medicine", "Cardiology", "Clinical Case", "Emergency"]
+  },
+  {
+    "text": "Which of the following classes of oral hypoglycemic agents works primarily by stimulating insulin secretion from pancreatic beta cells?",
+    "options": [
+      "Biguanides (e.g., Metformin)",
+      "Thiazolidinediones (e.g., Pioglitazone)",
+      "Sulfonylureas (e.g., Glipizide)",
+      "Alpha-glucosidase inhibitors (e.g., Acarbose)"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Sulfonylureas act by binding to the SUR1 receptor on pancreatic beta cells, closing ATP-sensitive potassium channels, which leads to cell depolarization, calcium influx, and subsequent insulin exocytosis.",
+    "difficulty": "easy",
+    "topic": "Endocrinology",
+    "tags": ["Pharmacy", "Pharmacology", "Diabetes", "Drug-related"]
+  },
+  {
+    "text": "During CPR on an adult patient, what is the recommended depth of chest compressions according to the latest AHA guidelines?",
+    "options": [
+      "At least 1 inch (2.5 cm)",
+      "At least 1.5 inches (4 cm)",
+      "At least 2 inches (5 cm) but no more than 2.4 inches (6 cm)",
+      "At least 3 inches (7.5 cm)"
+    ],
+    "correctAnswer": 2,
+    "explanation": "The American Heart Association (AHA) recommends compressing the chest of an adult at least 2 inches (5 cm) but no more than 2.4 inches (6 cm) to ensure effective blood flow without causing excessive trauma.",
+    "difficulty": "medium",
+    "topic": "Basic Life Support",
+    "tags": ["Nursing", "Emergency Medicine", "CPR", "Guidelines"]
+  },
+  {
+    "text": "A patient with chronic kidney disease is prescribed a loop diuretic. Which part of the nephron does this medication primarily target?",
+    "options": [
+      "Proximal convoluted tubule",
+      "Descending limb of the loop of Henle",
+      "Thick ascending limb of the loop of Henle",
+      "Distal convoluted tubule"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Loop diuretics, such as furosemide, inhibit the Na+/K+/2Cl- cotransporter in the thick ascending limb of the loop of Henle, leading to significant diuresis.",
+    "difficulty": "hard",
+    "topic": "Renal System",
+    "tags": ["MBBS", "Pharmacology", "Nephrology", "Theory based"]
+  },
+  {
+    "text": "Which of the following is the most common cause of community-acquired pneumonia in adults?",
+    "options": [
+      "Staphylococcus aureus",
+      "Streptococcus pneumoniae",
+      "Haemophilus influenzae",
+      "Mycoplasma pneumoniae"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Streptococcus pneumoniae (pneumococcus) is the most common bacterial cause of typical community-acquired pneumonia (CAP) in adults.",
+    "difficulty": "easy",
+    "topic": "Respiratory Tract Infections",
+    "tags": ["MBBS", "Pathology", "Microbiology", "Theory based"]
+  },
+  {
+    "text": "In a standard 12-lead ECG, which leads are best for observing the inferior wall of the left ventricle?",
+    "options": [
+      "V1, V2, V3, V4",
+      "I, aVL, V5, V6",
+      "II, III, aVF",
+      "V1, aVR"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Leads II, III, and aVF look at the inferior surface of the heart, which is primarily supplied by the right coronary artery (RCA).",
+    "difficulty": "medium",
+    "topic": "Electrocardiography",
+    "tags": ["MBBS", "Paramedical", "Cardiology", "Diagnostics"]
+  },
+  {
+    "text": "Which of the following local anesthetics is classified as an amide?",
+    "options": [
+      "Procaine",
+      "Tetracaine",
+      "Benzocaine",
+      "Lidocaine"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Lidocaine is an amide local anesthetic. A helpful mnemonic is that amides have two 'i's in their generic name (lIdocaIne), while esters have only one (procaine).",
+    "difficulty": "easy",
+    "topic": "Anesthesia",
+    "tags": ["BDS", "Pharmacology", "Dental", "Theory based"]
+  },
+  {
+    "text": "A 28-year-old primigravida presents at 34 weeks of gestation with a blood pressure of 160/110 mmHg, proteinuria (+3), and hyperreflexia. She has no history of seizures. What is the most appropriate initial management to prevent seizures?",
+    "options": [
+      "Intravenous Diazepam",
+      "Intravenous Magnesium Sulfate",
+      "Oral Nifedipine",
+      "Intravenous Phenytoin"
+    ],
+    "correctAnswer": 1,
+    "explanation": "The patient has severe preeclampsia. Intravenous magnesium sulfate is the drug of choice for seizure prophylaxis in patients with severe preeclampsia.",
+    "difficulty": "hard",
+    "topic": "Hypertensive Disorders of Pregnancy",
+    "tags": ["MBBS", "Nursing", "Gynecology", "Clinical Case"]
+  },
+  {
+    "text": "Which vitamin deficiency is classically associated with the development of scurvy, characterized by bleeding gums and poor wound healing?",
+    "options": [
+      "Vitamin A",
+      "Vitamin B12",
+      "Vitamin C",
+      "Vitamin K"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Vitamin C (ascorbic acid) deficiency leads to scurvy because it is a necessary cofactor for the hydroxylation of proline and lysine in collagen synthesis.",
+    "difficulty": "easy",
+    "topic": "Vitamins and Minerals",
+    "tags": ["Biochemistry", "Nutrition", "Theory based"]
+  },
+  {
+    "text": "During a blood transfusion, a patient suddenly develops fever, chills, back pain, and hemoglobinuria. This is most likely characteristic of which type of hypersensitivity reaction?",
+    "options": [
+      "Type I (IgE-mediated)",
+      "Type II (Cytotoxic)",
+      "Type III (Immune complex)",
+      "Type IV (Delayed-type)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "An acute hemolytic transfusion reaction is a classic example of a Type II (cytotoxic) hypersensitivity reaction, where antibodies bind to antigens on the transfused red blood cells, leading to complement activation and cell lysis.",
+    "difficulty": "medium",
+    "topic": "Immunology",
+    "tags": ["MBBS", "Pathology", "Clinical Case"]
+  }
+]
