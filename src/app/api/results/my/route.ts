@@ -33,11 +33,22 @@ export async function GET() {
 
     const objectId = new mongoose.Types.ObjectId(userId);
 
-    // Exam model must be imported (above) for populate to work in serverless
-    const results = await Result.find({ userId: objectId })
-      .populate('examId', 'title category durationMinutes')
+    // Fetch raw results
+    const rawResults = await Result.find({ userId: objectId })
       .sort({ submittedAt: -1 })
       .lean();
+
+    // Manual populate to avoid Mongoose serverless registry issues
+    const examIds = [...new Set(rawResults.map((r: any) => r.examId?.toString()).filter(Boolean))];
+    const exams = await Exam.find({ _id: { $in: examIds } }).select('title category durationMinutes').lean();
+    
+    const examMap = new Map();
+    exams.forEach((e: any) => examMap.set(e._id.toString(), e));
+
+    const results = rawResults.map((r: any) => ({
+      ...r,
+      examId: r.examId ? (examMap.get(r.examId.toString()) || null) : null
+    }));
 
     const safeResults = Array.isArray(results) ? results : [];
     return NextResponse.json(safeResults, { status: 200 });

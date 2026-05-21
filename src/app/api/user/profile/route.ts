@@ -29,11 +29,23 @@ export async function GET() {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Fetch recent results
-    const recentResults = await Result.find({ userId: user._id })
+    // Fetch recent results (raw)
+    const rawRecentResults = await Result.find({ userId: user._id })
       .sort({ submittedAt: -1 })
       .limit(5)
-      .populate('examId', 'title category');
+      .lean();
+
+    // Manual populate for recent results
+    const recentExamIds = [...new Set(rawRecentResults.map((r: any) => r.examId?.toString()).filter(Boolean))];
+    const recentExams = await Exam.find({ _id: { $in: recentExamIds } }).select('title category').lean();
+    
+    const recentExamMap = new Map();
+    recentExams.forEach((e: any) => recentExamMap.set(e._id.toString(), e));
+
+    const recentResults = rawRecentResults.map((r: any) => ({
+      ...r,
+      examId: r.examId ? (recentExamMap.get(r.examId.toString()) || null) : null
+    }));
 
     // Calculate aggregated stats
     const allResults = await Result.find({ userId: user._id });

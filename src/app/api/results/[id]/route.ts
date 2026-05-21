@@ -20,17 +20,35 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string, role: string };
     const { id } = await params;
 
-    // Fetch result and populate questions
-    const result = await Result.findById(id)
-      .populate('examId', 'title category durationMinutes totalMarks')
-      .populate({
-        path: 'answers.questionId',
-        select: 'text options correctAnswer explanation difficulty topic',
-      });
+    // Fetch raw result
+    const rawResult = await Result.findById(id).lean();
 
-    if (!result) {
+    if (!rawResult) {
       return NextResponse.json({ message: 'Result not found' }, { status: 404 });
     }
+
+    // Manual populate examId
+    let examData = null;
+    if (rawResult.examId) {
+      examData = await Exam.findById(rawResult.examId).select('title category durationMinutes totalMarks').lean();
+    }
+
+    // Manual populate answers.questionId
+    const questionIds = [...new Set((rawResult.answers || []).map((a: any) => a.questionId?.toString()).filter(Boolean))];
+    const questions = await Question.find({ _id: { $in: questionIds } }).select('text options correctAnswer explanation difficulty topic').lean();
+    const questionMap = new Map();
+    questions.forEach((q: any) => questionMap.set(q._id.toString(), q));
+
+    const populatedAnswers = (rawResult.answers || []).map((a: any) => ({
+      ...a,
+      questionId: a.questionId ? (questionMap.get(a.questionId.toString()) || null) : null
+    }));
+
+    const result = {
+      ...rawResult,
+      examId: examData,
+      answers: populatedAnswers
+    };
 
     // Optional: Check if user owns the result or is admin
     if (result.userId.toString() !== decoded.userId && decoded.role !== 'admin') {
