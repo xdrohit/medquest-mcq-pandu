@@ -16,7 +16,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const res = await fetch("/api/exams");
+        const res = await fetch("/api/exams", { cache: "no-store" });
         const data = await res.json();
         if (res.ok) {
           setExams(data);

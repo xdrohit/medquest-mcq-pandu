@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 import Question from '@/models/Question';
 
 // GET all questions (with optional exam filter)

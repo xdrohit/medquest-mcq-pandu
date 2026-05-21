@@ -23,12 +23,12 @@ export default function ExamPage() {
     const fetchData = async () => {
       try {
         // Fetch Exam Details
-        const examRes = await fetch("/api/exams");
+        const examRes = await fetch("/api/exams", { cache: "no-store" });
         const allExams = await examRes.json();
         const currentExam = allExams.find((e: any) => e._id === id);
         
         // Fetch Questions
-        const questionsRes = await fetch(`/api/exams/${id}/questions`);
+        const questionsRes = await fetch(`/api/exams/${id}/questions`, { cache: "no-store" });
         const examQuestions = await questionsRes.json();
         
         if (currentExam && examQuestions.length > 0) {
@@ -106,6 +106,15 @@ export default function ExamPage() {
     const s = seconds % 60;
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50">
+        <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-4"></div>
+        <h2 className="text-xl font-bold text-slate-700 animate-pulse">Loading your exam...</h2>
+      </div>
+    );
+  }
 
   if (!exam || questions.length === 0) {
     return (
