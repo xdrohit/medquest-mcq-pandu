@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Trophy, CheckCircle2, XCircle, ArrowLeft, BrainCircuit,
   Clock, AlertTriangle, ChevronRight, ChevronLeft,
-  Target, BookOpen, BarChart2, Award
+  Target, BookOpen, BarChart2, Award, Bookmark, Lightbulb, SkipForward
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
@@ -39,14 +39,51 @@ export default function ResultDetailPage() {
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeQ, setActiveQ] = useState(0);
+  const [bookmarks, setBookmarks] = useState<Record<string, boolean>>({});
+  const [isBookmarking, setIsBookmarking] = useState(false);
 
   useEffect(() => {
     fetch(`/api/results/${id}`, { cache: "no-store" })
       .then(r => r.ok ? r.json() : null)
-      .then(d => setResult(d))
+      .then(async (d) => {
+        setResult(d);
+        // Fetch bookmarks
+        try {
+          const bRes = await fetch('/api/bookmarks');
+          if (bRes.ok) {
+            const bData = await bRes.json();
+            const bMap: Record<string, boolean> = {};
+            bData.forEach((b: any) => { bMap[b.questionId] = true; });
+            setBookmarks(bMap);
+          }
+        } catch (e) {}
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  const toggleBookmark = async (questionId: string) => {
+    if (isBookmarking) return;
+    setIsBookmarking(true);
+    try {
+      const isSaved = bookmarks[questionId];
+      if (isSaved) {
+        await fetch(`/api/bookmarks?questionId=${questionId}`, { method: 'DELETE' });
+        setBookmarks(prev => ({ ...prev, [questionId]: false }));
+      } else {
+        await fetch('/api/bookmarks', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionId, examId: result?.examId?._id })
+        });
+        setBookmarks(prev => ({ ...prev, [questionId]: true }));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsBookmarking(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -68,12 +105,27 @@ export default function ResultDetailPage() {
 
   const pct = Math.round((result.score / result.totalQuestions) * 100);
   const grade = getGrade(pct);
-  const isPass = pct >= 50;
+  const isPass = pct >= (result.examId?.passingMarks || 50);
 
   const currentAnswer = result.answers[activeQ];
   const question = currentAnswer?.questionId;
   const correctCount = result.answers.filter((a: any) => a.isCorrect).length;
-  const wrongCount = result.totalQuestions - correctCount;
+  const skippedCount = result.answers.filter((a: any) => a.selectedOption === -1).length;
+  const wrongCount = result.totalQuestions - correctCount - skippedCount;
+
+  // Calculate Topic Analytics
+  const topicStats: Record<string, { total: number; correct: number }> = {};
+  if (result.answers) {
+    result.answers.forEach((ans: any) => {
+      const topic = ans.questionId?.topic || 'General';
+      if (!topicStats[topic]) topicStats[topic] = { total: 0, correct: 0 };
+      topicStats[topic].total += 1;
+      if (ans.isCorrect) topicStats[topic].correct += 1;
+    });
+  }
+  const topics = Object.entries(topicStats)
+    .map(([name, stats]) => ({ name, pct: Math.round((stats.correct / stats.total) * 100), ...stats }))
+    .sort((a, b) => b.pct - a.pct);
 
   return (
     <main className="min-h-screen bg-slate-950 text-white pb-20">
@@ -128,6 +180,7 @@ export default function ResultDetailPage() {
                 {[
                   { icon: CheckCircle2, label: `${correctCount} Correct`,    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
                   { icon: XCircle,      label: `${wrongCount} Wrong`,        color: "text-red-400 bg-red-500/10 border-red-500/20" },
+                  { icon: SkipForward,  label: `${skippedCount} Skipped`,    color: "text-slate-400 bg-slate-800 border-slate-700" },
                   { icon: Clock,        label: formatTime(result.timeTakenSeconds), color: "text-slate-300 bg-slate-800 border-slate-700" },
                   { icon: Target,       label: `${result.score}/${result.totalQuestions} Score`, color: "text-primary-400 bg-primary-500/10 border-primary-500/20" },
                 ].map((s, i) => (
@@ -143,24 +196,50 @@ export default function ResultDetailPage() {
 
       <div className="max-w-6xl mx-auto px-4 space-y-6">
 
-        {/* Weak Topics */}
-        {result.weakTopics?.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="rounded-2xl bg-slate-900 border border-red-500/20 p-6"
-          >
-            <h2 className="font-bold text-white flex items-center gap-2 mb-4">
-              <AlertTriangle className="w-5 h-5 text-red-400" /> Topics to Revise
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {result.weakTopics.map((t: string, i: number) => (
-                <span key={i} className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold">
-                  {t}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        )}
+        {/* Weak Topics & Analytics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {result.weakTopics?.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="rounded-2xl bg-slate-900 border border-red-500/20 p-6 flex flex-col"
+            >
+              <h2 className="font-bold text-white flex items-center gap-2 mb-4">
+                <AlertTriangle className="w-5 h-5 text-red-400" /> Topics to Revise
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {result.weakTopics.map((t: string, i: number) => (
+                  <span key={i} className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {topics.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
+              className="rounded-2xl bg-slate-900 border border-slate-800 p-6 flex flex-col"
+            >
+              <h2 className="font-bold text-white flex items-center gap-2 mb-4">
+                <BarChart2 className="w-5 h-5 text-primary-400" /> Subject Performance
+              </h2>
+              <div className="space-y-4">
+                {topics.slice(0, 4).map((t, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-xs font-bold mb-1.5">
+                      <span className="text-slate-300">{t.name}</span>
+                      <span className={t.pct >= 50 ? "text-emerald-400" : "text-amber-400"}>{t.pct}%</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
+                      <div className={`h-full rounded-full transition-all duration-1000 ${t.pct >= 75 ? "bg-emerald-500" : t.pct >= 50 ? "bg-primary-500" : "bg-amber-500"}`} style={{ width: `${t.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </div>
 
         {/* Question Review */}
         <motion.div
@@ -178,9 +257,11 @@ export default function ResultDetailPage() {
                   key={idx}
                   onClick={() => setActiveQ(idx)}
                   className={`aspect-square rounded-xl border-2 flex items-center justify-center text-xs font-bold transition-all hover:scale-110 ${
-                    ans.isCorrect
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                      : "bg-red-500/10 text-red-400 border-red-500/30"
+                    ans.selectedOption === -1
+                      ? "bg-slate-800 text-slate-400 border-slate-700"
+                      : ans.isCorrect
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                        : "bg-red-500/10 text-red-400 border-red-500/30"
                   } ${activeQ === idx ? "ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110" : ""}`}
                 >
                   {idx + 1}
@@ -191,23 +272,43 @@ export default function ResultDetailPage() {
             <div className="mt-4 pt-4 border-t border-slate-800 space-y-1.5 text-xs text-slate-500">
               <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500/30" /> Correct</div>
               <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-red-500/30 border border-red-500/30" /> Incorrect</div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-slate-800 border border-slate-700" /> Skipped</div>
             </div>
           </div>
 
           {/* Question Detail */}
           <div className="lg:col-span-3 rounded-2xl bg-slate-900 border border-slate-800 p-6 lg:p-8 flex flex-col">
             <div className="flex items-center justify-between mb-6">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-lg">
-                Question {activeQ + 1} of {result.answers.length}
-              </span>
-              {currentAnswer && (
-                <span className={`text-xs font-bold px-3 py-1 rounded-lg border ${
-                  currentAnswer.isCorrect
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                    : "bg-red-500/10 text-red-400 border-red-500/30"
-                }`}>
-                  {currentAnswer.isCorrect ? "✓ Correct" : "✗ Incorrect"}
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-lg">
+                  Question {activeQ + 1} of {result.answers.length}
                 </span>
+                {currentAnswer && (
+                  <span className={`text-xs font-bold px-3 py-1 rounded-lg border ${
+                    currentAnswer.selectedOption === -1
+                      ? "bg-slate-800 text-slate-400 border-slate-700"
+                      : currentAnswer.isCorrect
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                        : "bg-red-500/10 text-red-400 border-red-500/30"
+                  }`}>
+                    {currentAnswer.selectedOption === -1 ? "Skipped" : currentAnswer.isCorrect ? "✓ Correct" : "✗ Incorrect"}
+                  </span>
+                )}
+              </div>
+              
+              {question && (
+                <button
+                  onClick={() => toggleBookmark(question._id)}
+                  disabled={isBookmarking}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-sm font-bold ${
+                    bookmarks[question._id]
+                      ? "bg-primary-500/10 text-primary-400 border-primary-500/30 hover:bg-primary-500/20"
+                      : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:border-slate-600"
+                  }`}
+                >
+                  <Bookmark className={`w-4 h-4 ${bookmarks[question._id] ? "fill-primary-400" : ""}`} />
+                  <span className="hidden sm:inline">{bookmarks[question._id] ? "Saved" : "Save"}</span>
+                </button>
               )}
             </div>
 
@@ -238,7 +339,7 @@ export default function ResultDetailPage() {
                         <div key={oIdx} className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${style}`}>
                           <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-black text-sm flex-shrink-0 ${
                             isCorrect ? "border-emerald-500 bg-emerald-500 text-white"
-                            : isSelected ? "border-red-500 bg-red-500 text-white"
+                            : (isSelected && !isCorrect) ? "border-red-500 bg-red-500 text-white"
                             : "border-slate-600 text-slate-500"
                           }`}>
                             {String.fromCharCode(65 + oIdx)}
@@ -251,13 +352,18 @@ export default function ResultDetailPage() {
                     })}
                   </div>
 
-                  {/* Explanation */}
+                  {/* Clinical Pearl / Explanation */}
                   {question.explanation && (
-                    <div className="mt-auto rounded-xl bg-gradient-to-br from-primary-900/40 to-slate-900 border border-primary-500/20 p-5">
-                      <h4 className="font-bold text-primary-400 flex items-center gap-2 mb-2 text-sm">
-                        <BrainCircuit className="w-4 h-4" /> Explanation
-                      </h4>
-                      <p className="text-slate-300 text-sm leading-relaxed">{question.explanation}</p>
+                    <div className="mt-auto rounded-2xl bg-gradient-to-br from-indigo-500/10 via-slate-900 to-slate-900 border border-indigo-500/20 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex flex-shrink-0 items-center justify-center border border-indigo-500/30">
+                          <Lightbulb className="w-5 h-5 text-indigo-400" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-indigo-300 mb-1">Clinical Pearl</h4>
+                          <p className="text-slate-300 text-sm leading-relaxed">{question.explanation}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </motion.div>
