@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import Result from '@/models/Result';
+import Exam from '@/models/Exam'; // Required for populate('examId')
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 
