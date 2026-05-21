@@ -44,7 +44,7 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto">
         <div className="glass rounded-2xl px-6 py-3 flex items-center justify-between shadow-[0_8px_32px_rgba(37,99,235,0.1)]">
           
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 text-white shadow-[0_0_15px_rgba(14,165,233,0.5)] group-hover:shadow-[0_0_25px_rgba(14,165,233,0.8)] transition-shadow">
               <Activity className="w-6 h-6" />
             </div>
@@ -55,11 +55,11 @@ export const Navbar = () => {
 
 
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className={`text-sm font-medium transition-colors ${pathname === '/' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
+            <Link href={user ? "/dashboard" : "/"} className={`text-sm font-medium transition-colors ${pathname === '/' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Home
             </Link>
             <Link href="/dashboard" className={`text-sm font-medium transition-colors ${pathname === '/dashboard' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
-              Exams
+              Dashboard
             </Link>
             {user && (
               <Link href="/dashboard/results" className={`text-sm font-medium transition-colors ${pathname === '/dashboard/results' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>

@@ -37,13 +37,9 @@ export async function proxy(req: NextRequest) {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       const { payload } = await jwtVerify(token, secret);
 
-      // Role check
+      // Allow admin to view dashboard, only block non-admins from /admin
       if (isAdminPage && payload.role !== 'admin') {
         return NextResponse.redirect(new URL('/dashboard', req.url));
-      }
-      
-      if (isDashboard && payload.role === 'admin') {
-         return NextResponse.redirect(new URL('/admin', req.url));
       }
 
       return NextResponse.next();

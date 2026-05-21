@@ -15,6 +15,7 @@ const navItems = [
   { href: "/admin/tests", label: "Test Management", icon: ClipboardList },
   { href: "/admin/students", label: "Students", icon: Users },
   { href: "/admin/payments", label: "Payments", icon: CreditCard },
+  { href: "/dashboard", label: "Student View", icon: Activity },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
