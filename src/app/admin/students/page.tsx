@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, ClipboardList, Users, CreditCard,
-  LogOut, Activity, ShieldCheck, Search, Edit2, Trash2, Plus
+  LogOut, Activity, ShieldCheck, Search, Edit2, Trash2, Plus, X, AlertCircle
 } from "lucide-react";
 
 const navItems = [
@@ -66,27 +66,108 @@ export default function AdminStudentsPage() {
 
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchUsers = async () => {
+    try {
+      const timestamp = Date.now();
+      const res = await fetch(`/api/admin/users?t=${timestamp}`, { cache: "no-store" });
+      if (res.ok) {
+        setStudents(await res.json());
+      }
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const timestamp = Date.now();
-        const res = await fetch(`/api/admin/users?t=${timestamp}`, { cache: "no-store" });
-        if (res.ok) {
-          setStudents(await res.json());
-        }
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+      const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete");
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleAddAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to add admin");
+      setModalOpen(false);
+      setForm({ name: "", email: "", password: "" });
+      fetchUsers();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
       <AdminSidebar onLogout={handleLogout} />
+
+      <AnimatePresence>
+        {modalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+              className="relative z-10 w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-primary-400" /> Add New Admin</h2>
+                <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X className="w-5 h-5" /></button>
+              </div>
+              <form onSubmit={handleAddAdmin} className="p-6 space-y-4">
+                {error && (
+                  <div className="p-3 bg-red-950/50 border border-red-800 rounded-xl text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" /> {error}
+                  </div>
+                )}
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Name</label>
+                  <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500" placeholder="Admin Name" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Email</label>
+                  <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500" placeholder="admin@dailydosemcq.com" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Password</label>
+                  <input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500" placeholder="••••••••" />
+                </div>
+                <div className="pt-2">
+                  <button type="submit" disabled={saving} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50">
+                    {saving ? "Creating Admin..." : "Create Admin Account"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <main className="ml-64 flex-1 p-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -96,8 +177,8 @@ export default function AdminStudentsPage() {
             </h1>
             <p className="text-slate-400 text-sm mt-1">View and manage all registered students.</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-colors shadow-lg shadow-primary-500/20">
-            <Plus className="w-4 h-4" /> Add Student
+          <button onClick={() => setModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-colors shadow-lg shadow-primary-500/20">
+            <Plus className="w-4 h-4" /> Add Admin
           </button>
         </div>
 
@@ -163,7 +244,7 @@ export default function AdminStudentsPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button className="p-2 rounded-lg hover:bg-slate-700 text-slate-500 hover:text-primary-400 transition-colors"><Edit2 className="w-4 h-4" /></button>
-                      <button className="p-2 rounded-lg hover:bg-red-500/15 text-slate-500 hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(s._id)} className="p-2 rounded-lg hover:bg-red-500/15 text-slate-500 hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </motion.tr>
