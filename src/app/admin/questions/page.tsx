@@ -250,6 +250,7 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
       const options = [values[1]?.trim(), values[2]?.trim(), values[3]?.trim(), values[4]?.trim()];
       const correctVal = values[5]?.trim().toUpperCase();
       const explanation = values[6]?.trim() || "";
+      const topic = values[7]?.trim() || "";
 
       const ansMap: Record<string, number> = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
       const correctAnswer = ansMap[correctVal] ?? 0;
@@ -264,7 +265,7 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
         correctAnswer,
         explanation,
         difficulty: "medium",
-        topic: ""
+        topic
       };
     }).filter(Boolean);
 
@@ -299,9 +300,9 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
     }
   };
 
-  const sampleCsv = `Question,Option_A,Option_B,Option_C,Option_D,Correct_Answer,Explanation
-Dental arch ka cornerstone kis daant ko kaha jata hai?,Incisor,Canine,Premolar,Molar,B,Canines sabse strong aur longest roots wale teeth hote hain.
-Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central incisor,Mandibular central incisor,Mandibular first molar,Maxillary canine,B,Mandibular central incisor pehle erupt hota hai.`;
+  const sampleCsv = `Question,Option_A,Option_B,Option_C,Option_D,Correct_Answer,Explanation,Topic
+Dental arch ka cornerstone kis daant ko kaha jata hai?,Incisor,Canine,Premolar,Molar,B,Canines sabse strong aur longest roots wale teeth hote hain.,Dental Anatomy
+Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central incisor,Mandibular central incisor,Mandibular first molar,Maxillary canine,B,Mandibular central incisor pehle erupt hota hai.,Pedodontics`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -313,7 +314,7 @@ Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central in
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2"><Upload className="w-5 h-5 text-primary-400" /> Bulk Upload MCQs</h2>
-            <p className="text-slate-400 text-sm">Paste CSV data (Question, Opt A, Opt B, Opt C, Opt D, Answer, Explanation).</p>
+            <p className="text-slate-400 text-sm">Paste CSV data (Question, Opt A, Opt B, Opt C, Opt D, Answer, Explanation, Topic).</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X className="w-5 h-5" /></button>
         </div>
