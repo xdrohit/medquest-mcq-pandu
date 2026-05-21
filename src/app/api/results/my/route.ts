@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import Result from '@/models/Result';
 import Exam from '@/models/Exam'; // CRITICAL: must import so Mongoose registers the model for populate()
@@ -30,8 +31,10 @@ export async function GET() {
       return NextResponse.json({ error: 'NO_USER_ID' }, { status: 401 });
     }
 
+    const objectId = new mongoose.Types.ObjectId(userId);
+
     // Exam model must be imported (above) for populate to work in serverless
-    const results = await Result.find({ userId })
+    const results = await Result.find({ userId: objectId })
       .populate('examId', 'title category durationMinutes')
       .sort({ submittedAt: -1 })
       .lean();
