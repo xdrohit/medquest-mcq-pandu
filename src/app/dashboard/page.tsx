@@ -19,9 +19,10 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const timestamp = Date.now();
         const [examsRes, profileRes] = await Promise.all([
-          fetch("/api/exams", { cache: "no-store" }),
-          fetch("/api/user/profile", { cache: "no-store" })
+          fetch(`/api/exams?t=${timestamp}`, { cache: "no-store" }),
+          fetch(`/api/user/profile?t=${timestamp}`, { cache: "no-store" })
         ]);
         
         if (examsRes.ok) setExams(await examsRes.json());

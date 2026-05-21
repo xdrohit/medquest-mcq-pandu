@@ -345,9 +345,10 @@ export default function AdminQuestionsPage() {
     if (filterExam) params.set("examId", filterExam);
     if (filterDiff) params.set("difficulty", filterDiff);
     if (search) params.set("search", search);
+    const timestamp = Date.now();
     const [qRes, eRes] = await Promise.all([
-      fetch(`/api/admin/questions?${params}`),
-      fetch("/api/exams?all=true"),
+      fetch(`/api/admin/questions?${params}&t=${timestamp}`, { cache: "no-store" }),
+      fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }),
     ]);
     setQuestions(await qRes.json());
     setExams(await eRes.json());

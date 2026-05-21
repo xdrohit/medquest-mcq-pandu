@@ -64,11 +64,25 @@ export default function AdminStudentsPage() {
     window.location.href = "/";
   };
 
-  const students = [
-    { id: "st_1", name: "Sarah Connor", email: "sarah@example.com", status: "Active", enrolled: 4, lastLogin: "2 mins ago" },
-    { id: "st_2", name: "John Doe", email: "john@example.com", status: "Inactive", enrolled: 1, lastLogin: "3 days ago" },
-    { id: "st_3", name: "Emily Chen", email: "emily@example.com", status: "Active", enrolled: 6, lastLogin: "Just now" },
-  ];
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const timestamp = Date.now();
+        const res = await fetch(`/api/admin/users?t=${timestamp}`, { cache: "no-store" });
+        if (res.ok) {
+          setStudents(await res.json());
+        }
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
@@ -113,26 +127,39 @@ export default function AdminStudentsPage() {
               </tr>
             </thead>
             <tbody>
-              {students.map((s, i) => (
-                <motion.tr key={s.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.06 }} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/20 transition-colors">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-slate-500">
+                    <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    Loading users...
+                  </td>
+                </tr>
+              ) : students.filter(s => s.name?.toLowerCase().includes(search.toLowerCase()) || s.email?.toLowerCase().includes(search.toLowerCase())).map((s, i) => (
+                <motion.tr key={s._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/20 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500/30 to-accent-400/30 flex items-center justify-center text-white font-bold text-sm border border-primary-500/20">
-                        {s.name.charAt(0)}
+                        {s.name ? s.name.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div>
-                        <p className="text-white font-semibold text-sm">{s.name}</p>
+                        <p className="text-white font-semibold text-sm flex items-center gap-2">
+                          {s.name} {s.role === 'admin' && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold">Admin</span>}
+                        </p>
                         <p className="text-slate-500 text-xs">{s.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${s.status === "Active" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" : "bg-slate-700 text-slate-500 border-slate-600"}`}>
-                      {s.status === "Active" ? "● Active" : "○ Inactive"}
+                    <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-emerald-500/15 text-emerald-400 border-emerald-500/20">
+                      ● Active
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-slate-300 text-sm font-semibold">{s.enrolled} courses</td>
-                  <td className="px-6 py-4 text-slate-500 text-sm">{s.lastLogin}</td>
+                  <td className="px-6 py-4 text-slate-300 text-sm font-semibold text-center">
+                     -
+                  </td>
+                  <td className="px-6 py-4 text-slate-500 text-sm">
+                    {new Date(s.createdAt).toLocaleDateString()}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button className="p-2 rounded-lg hover:bg-slate-700 text-slate-500 hover:text-primary-400 transition-colors"><Edit2 className="w-4 h-4" /></button>

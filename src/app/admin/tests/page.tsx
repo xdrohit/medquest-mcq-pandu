@@ -247,7 +247,8 @@ export default function AdminTestsPage() {
 
   const fetchExams = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/exams?all=true");
+    const timestamp = Date.now();
+    const res = await fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" });
     const data = await res.json();
     setExams(Array.isArray(data) ? data : []);
     setLoading(false);
