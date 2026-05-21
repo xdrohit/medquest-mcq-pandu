@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
   Play, BookOpen, Activity, Target,
-  ChevronRight, Trophy, TrendingUp, AlertTriangle, CheckCircle2, Clock 
+  ChevronRight, Trophy, TrendingUp, AlertTriangle, CheckCircle2, Clock, Zap, Flame, Award, BarChart3, Shield
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
@@ -53,11 +53,22 @@ export default function StudentDashboard() {
   // Pre-compute values (always safe after statsLoading=false)
   const totalExams    = stats?.totalExams   ?? 0;
   const avgScore      = stats?.averageScore ?? 0;
+  const avgTime       = stats?.averageTimeSeconds ?? 0;
   const weakTopics: string[] = stats?.topWeakTopics ?? [];
   const recentResults: any[] = stats?.recentResults  ?? [];
   const firstName = authUser?.name?.split(" ")[0] || "Student";
 
-
+  // Gamification logic
+  const isSpeedDemon = avgTime > 0 && avgTime < 45; // Under 45s per question
+  const isAccuracyKing = avgScore >= 80;
+  
+  let performanceText = "Keep practicing to establish a baseline.";
+  if (totalExams > 0) {
+    if (isSpeedDemon && isAccuracyKing) performanceText = "Elite Performance: Extremely fast and highly accurate.";
+    else if (isSpeedDemon && !isAccuracyKing) performanceText = "You are fast, but accuracy is suffering. Slow down.";
+    else if (!isSpeedDemon && isAccuracyKing) performanceText = "Great accuracy, but try to improve your speed.";
+    else performanceText = "Work on both speed and accuracy. Focus on weak concepts.";
+  }
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pt-20 pb-12 overflow-hidden selection:bg-primary-500/30 transition-colors duration-300">
       <Navbar />
@@ -196,93 +207,152 @@ export default function StudentDashboard() {
         {activeTab === "analytics" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             
-            {/* Top Stats */}
+            {/* Top Stats - Glowing Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400"><Target className="w-5 h-5" /></div>
+              <div className="group relative rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none overflow-hidden transition-all hover:-translate-y-1">
+                <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 dark:opacity-5 dark:group-hover:opacity-20 transition-opacity duration-500 ${avgScore >= 80 ? 'from-emerald-500' : avgScore >= 50 ? 'from-amber-500' : 'from-red-500'}`} />
+                <div className="flex items-center gap-3 mb-4 relative z-10">
+                  <div className={`p-2.5 rounded-xl ${avgScore >= 80 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : avgScore >= 50 ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'}`}>
+                    <Target className="w-5 h-5" />
+                  </div>
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Average Score</h3>
                 </div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white">
+                <div className="text-4xl font-black text-slate-900 dark:text-white relative z-10">
                   {statsLoading ? <span className="inline-block w-20 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" /> : `${avgScore}%`}
                 </div>
               </div>
-              <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
-                <div className="flex items-center gap-3 mb-4">
+              <div className="group relative rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none overflow-hidden transition-all hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-transparent opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-500" />
+                <div className="flex items-center gap-3 mb-4 relative z-10">
                   <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"><CheckCircle2 className="w-5 h-5" /></div>
                   <h3 className="font-bold text-slate-700 dark:text-slate-300">Tests Completed</h3>
                 </div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white">
+                <div className="text-4xl font-black text-slate-900 dark:text-white relative z-10">
                   {statsLoading ? <span className="inline-block w-12 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" /> : totalExams}
                 </div>
               </div>
-              <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400"><TrendingUp className="w-5 h-5" /></div>
-                  <h3 className="font-bold text-slate-700 dark:text-slate-300">Global Rank</h3>
+              <div className="group relative rounded-3xl bg-gradient-to-br from-indigo-900/90 via-slate-900 to-slate-900 border border-indigo-500/30 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] overflow-hidden transition-all hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-transparent to-transparent opacity-50 mix-blend-overlay" />
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
+                <div className="flex items-center gap-3 mb-4 relative z-10">
+                  <div className="p-2.5 rounded-xl bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"><Award className="w-5 h-5" /></div>
+                  <h3 className="font-bold text-indigo-100">Global Rank</h3>
                 </div>
-                <div className="text-4xl font-black text-slate-900 dark:text-white">
-                  #42
+                <div className="text-4xl font-black text-white relative z-10 flex items-baseline gap-2">
+                  #42 <span className="text-sm font-medium text-indigo-300">Top 5%</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">Top 5% of students</p>
               </div>
             </div>
 
+            {/* Gamification / Performance Matrix */}
+            {!statsLoading && totalExams > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Performance Matrix</h3>
+                    <p className="font-bold text-slate-900 dark:text-white">{performanceText}</p>
+                  </div>
+                  <BarChart3 className={`w-8 h-8 opacity-20 ${isAccuracyKing ? 'text-emerald-500' : 'text-amber-500'}`} />
+                </div>
+                <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm dark:shadow-none">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Earned Badges</h3>
+                  <div className="flex gap-3">
+                    {isAccuracyKing ? (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 text-xs font-bold"><Target className="w-3.5 h-3.5" /> Accuracy King</div>
+                    ) : (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500 text-xs font-bold grayscale"><Target className="w-3.5 h-3.5" /> Accuracy King</div>
+                    )}
+                    {isSpeedDemon ? (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400 text-xs font-bold"><Zap className="w-3.5 h-3.5" /> Speed Demon</div>
+                    ) : (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500 text-xs font-bold grayscale"><Zap className="w-3.5 h-3.5" /> Speed Demon</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Weak Topics AI Analysis */}
+              {/* Weak Topics AI Analysis (Upgraded) */}
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 lg:p-8 shadow-sm dark:shadow-none">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2.5 rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"><AlertTriangle className="w-5 h-5" /></div>
                   <div>
                     <h3 className="font-bold text-slate-900 dark:text-white text-lg">AI Weakness Analysis</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Topics you need to revise</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Topics needing immediate attention</p>
                   </div>
                 </div>
                 
                 {weakTopics.length > 0 ? (
-                  <div className="space-y-3">
-                    {weakTopics.map((topic: string, i: number) => (
-                      <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                        <span className="font-semibold text-slate-700 dark:text-slate-200">{topic}</span>
-                        <Button variant="ghost" className="h-8 px-3 text-xs border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Practice</Button>
+                  <div className="space-y-4">
+                    {weakTopics.map((topic: string, i: number) => {
+                      // Mock severity based on index (index 0 is most frequent weakness)
+                      const severity = 100 - (i * 15);
+                      return (
+                      <div key={i} className="group flex flex-col p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 hover:border-red-200 dark:hover:border-red-500/30 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-slate-700 dark:text-slate-200 text-sm">{topic}</span>
+                          <Button variant="ghost" className="h-7 px-3 text-[10px] uppercase font-bold tracking-wider rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 border-none transition-colors opacity-0 group-hover:opacity-100">Practice</Button>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
+                          <div className={`h-full rounded-full transition-all duration-1000 ${severity > 80 ? 'bg-red-500' : severity > 50 ? 'bg-amber-500' : 'bg-primary-500'}`} style={{ width: `${severity}%` }} />
+                        </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 ) : (
                   <div className="text-center py-10">
-                    <Trophy className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-                    <p className="text-slate-500 dark:text-slate-400 font-medium">Take more tests to generate insights.</p>
+                    <Shield className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">No severe weaknesses detected yet.</p>
                   </div>
                 )}
               </div>
 
-              {/* Recent History */}
+              {/* Recent History (Upgraded) */}
               <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 lg:p-8 shadow-sm dark:shadow-none">
-                <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-6 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-primary-600 dark:text-primary-400" /> Recent Battles
-                </h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-primary-600 dark:text-primary-400" /> Recent Battles
+                  </h3>
+                  {/* Mini Sparkline indicator */}
+                  <div className="flex items-end gap-1 h-6">
+                    {recentResults.slice(0, 5).reverse().map((r: any, i: number) => {
+                      const hPct = Math.max(10, Math.round((r.score / r.totalQuestions) * 100));
+                      return (
+                        <div key={i} className="w-2 rounded-t-sm bg-primary-500/30 dark:bg-primary-500/50 hover:bg-primary-500 transition-colors cursor-pointer" style={{ height: `${hPct}%` }} title={`${hPct}%`} />
+                      );
+                    })}
+                  </div>
+                </div>
                 
                 {recentResults.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentResults.map((result: any, i: number) => (
+                  <div className="space-y-3">
+                    {recentResults.map((result: any, i: number) => {
+                      const pct = Math.round((result.score / result.totalQuestions) * 100);
+                      const colorClass = pct >= 80 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 50 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400';
+                      
+                      return (
                       <Link key={result._id} href={`/dashboard/results/${result._id}`}>
-                        <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary-500/50 transition-all cursor-pointer group">
+                        <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 hover:border-primary-200 dark:hover:border-primary-500/30 transition-all cursor-pointer group">
                           <div>
-                            <h4 className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{result.examId?.title || 'Unknown Exam'}</h4>
-                            <p className="text-xs text-slate-500 mt-1">{new Date(result.submittedAt).toLocaleDateString()}</p>
+                            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{result.examId?.title || 'Unknown Exam'}</h4>
+                            <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider font-bold">{new Date(result.submittedAt).toLocaleDateString()}</p>
                           </div>
                           <div className="text-right">
-                            <div className="font-black text-lg text-slate-900 dark:text-white">
-                              {Math.round((result.score / result.totalQuestions) * 100)}%
+                            <div className={`font-black text-lg ${colorClass}`}>
+                              {pct}%
                             </div>
-                            <div className="text-xs font-bold text-slate-500">{result.score}/{result.totalQuestions} correct</div>
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{result.score}/{result.totalQuestions} correct</div>
                           </div>
                         </div>
                       </Link>
-                    ))}
+                    )})}
                   </div>
                 ) : (
-                  <p className="text-slate-500 text-center py-10">No recent activity.</p>
+                  <div className="text-center py-10">
+                    <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">No battles fought yet.</p>
+                  </div>
                 )}
               </div>
             </div>

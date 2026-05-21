@@ -51,9 +51,14 @@ export async function GET() {
     const allResults = await Result.find({ userId: user._id });
     const totalExams = allResults.length;
     let averageScore = 0;
+    let averageTimeSeconds = 0;
+    
     if (totalExams > 0) {
       const totalPercentage = allResults.reduce((acc, res) => acc + ((res.score / res.totalQuestions) * 100), 0);
       averageScore = Math.round(totalPercentage / totalExams);
+      
+      const totalTime = allResults.reduce((acc, res) => acc + (res.timeTakenSeconds || 0), 0);
+      averageTimeSeconds = Math.round(totalTime / totalExams);
     }
 
     // Extract all weak topics
@@ -81,6 +86,7 @@ export async function GET() {
       stats: {
         totalExams,
         averageScore,
+        averageTimeSeconds,
         recentResults,
         topWeakTopics
       }
