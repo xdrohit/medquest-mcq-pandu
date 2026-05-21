@@ -12,18 +12,32 @@ export async function GET() {
 
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
-    if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+    if (!token) {
+      return NextResponse.json([], { status: 200 }); // Return empty array, not error
+    }
+
+    let decoded: { userId: string };
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
+    } catch {
+      return NextResponse.json([], { status: 200 }); // Token invalid → empty, not 401
+    }
+
     const userId = decoded.userId;
+    if (!userId) return NextResponse.json([], { status: 200 });
 
     const results = await Result.find({ userId })
       .populate('examId', 'title category durationMinutes')
-      .sort({ submittedAt: -1 });
+      .sort({ submittedAt: -1 })
+      .lean(); // lean() for faster, plain JS objects
 
-    return NextResponse.json(results, { status: 200 });
+    // Ensure we always return a clean array even if populate had partial failures
+    const safeResults = Array.isArray(results) ? results : [];
+
+    return NextResponse.json(safeResults, { status: 200 });
   } catch (error) {
     console.error('Error fetching my results:', error);
-    return NextResponse.json({ message: 'Error fetching results' }, { status: 500 });
+    return NextResponse.json([], { status: 200 }); // Never return an error that breaks UI
   }
 }

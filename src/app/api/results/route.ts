@@ -31,13 +31,13 @@ export async function POST(req: Request) {
     for (const ans of data.answers) {
       const q = await Question.findById(ans.questionId);
       if (q) {
-        const isCorrect = q.correctAnswer === ans.selectedOption;
+        const isCorrect = ans.selectedOption !== -1 && q.correctAnswer === ans.selectedOption;
         if (isCorrect) score += 1;
-        else if (q.topic) weakTopicsSet.add(q.topic); // If wrong, add to weak topics
-        
+        else if (q.topic && ans.selectedOption !== -1) weakTopicsSet.add(q.topic); // Only add if attempted
+
         detailedAnswers.push({
           questionId: q._id,
-          selectedOption: ans.selectedOption,
+          selectedOption: ans.selectedOption, // -1 means unanswered
           isCorrect,
           timeSpentSeconds: ans.timeSpentSeconds || 0
         });

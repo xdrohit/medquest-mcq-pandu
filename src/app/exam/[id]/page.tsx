@@ -123,41 +123,61 @@ export default function FullscreenExamEngine() {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return; // Prevent double submit
     setSubmitting(true);
-    
-    const formattedAnswers = Object.entries(answers).map(([idxStr, selectedOption]) => {
-      const idx = parseInt(idxStr);
-      return {
-        questionId: questions[idx]._id,
-        selectedOption,
-        timeSpentSeconds: timeSpent[idx] || 0
-      };
-    });
 
-    try {
-      const res = await fetch("/api/results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          examId: id,
-          timeTakenSeconds: (exam.durationMinutes * 60) - timeLeft,
-          answers: formattedAnswers
-        })
-      });
-      
-      const resultData = await res.json();
-      localStorage.removeItem(`exam_${id}`); // Clear save
-      
-      if (res.ok) {
-        router.push(`/dashboard/results/${resultData.resultId}`);
-      } else {
-        alert("Failed to submit. Please try again.");
-        setSubmitting(false);
+    // Include ALL questions - unanswered ones get selectedOption: -1
+    const formattedAnswers = questions.map((q: any, idx: number) => ({
+      questionId: q._id,
+      selectedOption: answers[idx] !== undefined ? answers[idx] : -1,
+      timeSpentSeconds: timeSpent[idx] || 0
+    }));
+
+    const payload = {
+      examId: id,
+      timeTakenSeconds: (exam.durationMinutes * 60) - timeLeft,
+      answers: formattedAnswers
+    };
+
+    // Retry up to 3 times on network failure
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch("/api/results", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const resultData = await res.json();
+
+        if (res.ok && resultData.resultId) {
+          localStorage.removeItem(`exam_${id}`);
+          router.push(`/dashboard/results/${resultData.resultId}`);
+          return; // Success — exit
+        }
+
+        // Non-network error (e.g. 401) — no point retrying
+        if (res.status === 401) {
+          alert("Session expired. Please log in again.");
+          router.push("/login");
+          return;
+        }
+
+        console.warn(`Submit attempt ${attempt} failed:`, resultData.message);
+      } catch (err) {
+        console.error(`Submit attempt ${attempt} network error:`, err);
+        if (attempt === 3) {
+          alert("Failed to submit after 3 attempts. Please check your connection and try again.");
+          setSubmitting(false);
+          return;
+        }
+        // Wait 1s before retry
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    } catch (err) {
-      console.error("Submit error:", err);
-      setSubmitting(false);
     }
+
+    alert("Submission failed. Please try again.");
+    setSubmitting(false);
   };
 
   const formatTime = (seconds: number) => {

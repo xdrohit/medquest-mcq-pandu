@@ -31,16 +31,31 @@ function getGrade(pct: number) {
 export default function MyResultsPage() {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "score">("date");
 
-  useEffect(() => {
+  const loadResults = () => {
+    setLoading(true);
+    setError(false);
     fetch(`/api/results/my?t=${Date.now()}`, { cache: "no-store" })
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setResults(Array.isArray(data) ? data : []))
-      .catch(() => setResults([]))
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(data => {
+        setResults(Array.isArray(data) ? data : []);
+        setError(false);
+      })
+      .catch(err => {
+        console.error("Failed to load results:", err);
+        setError(true);
+        setResults([]);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadResults(); }, []);
 
   const filtered = results
     .filter(r => {
@@ -149,7 +164,7 @@ export default function MyResultsPage() {
         )}
 
         {/* Empty State */}
-        {!loading && results.length === 0 && (
+        {!loading && !error && results.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="text-center py-24"
@@ -160,6 +175,26 @@ export default function MyResultsPage() {
             <Link href="/dashboard" className="inline-block px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white font-bold text-sm transition-colors">
               Browse Tests
             </Link>
+          </motion.div>
+        )}
+
+        {/* Error State */}
+        {!loading && error && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-24"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+              <Trophy className="w-8 h-8 text-red-400" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-300 mb-2">Couldn&apos;t load results</h3>
+            <p className="text-slate-500 mb-6">There was a connection issue. Your results are safe.</p>
+            <button
+              onClick={loadResults}
+              className="px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white font-bold text-sm transition-colors"
+            >
+              Try Again
+            </button>
           </motion.div>
         )}
 
