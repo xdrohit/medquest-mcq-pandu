@@ -61,6 +61,11 @@ export const Navbar = () => {
             <Link href="/dashboard" className={`text-sm font-medium transition-colors ${pathname === '/dashboard' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Exams
             </Link>
+            {user && (
+              <Link href="/dashboard/results" className={`text-sm font-medium transition-colors ${pathname === '/dashboard/results' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
+                Results
+              </Link>
+            )}
             <Link href="/dashboard" className={`text-sm font-medium transition-colors ${pathname === '/dashboard' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:text-primary-500 dark:hover:text-primary-300'}`}>
               Leaderboard
             </Link>
