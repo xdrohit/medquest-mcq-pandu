@@ -6,6 +6,7 @@ import { Brain, Stethoscope, Pill, Activity, ArrowRight, ShieldCheck, Zap } from
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/GlassCard";
+import Link from "next/link";
 
 export default function HomePage() {
   const categories = [
@@ -16,6 +17,7 @@ export default function HomePage() {
   ];
 
   return (
+    <>
     <main className="flex min-h-screen flex-col items-center pt-24 pb-12 px-4 overflow-hidden relative transition-colors duration-300">
       <Navbar />
 
@@ -168,5 +170,23 @@ export default function HomePage() {
       </section>
 
     </main>
+
+      {/* Simple Footer */}
+      <footer className="w-full bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-12 px-6 text-center text-sm text-slate-500 relative z-20">
+        <div className="flex flex-wrap justify-center gap-6 mb-6">
+          <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">About Us</Link>
+          <Link href="/privacy" className="hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Terms & Conditions</Link>
+        </div>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-6 h-6 rounded-md bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 flex items-center justify-center">
+            <Activity className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-slate-700 dark:text-slate-300">Daily Dose MCQ</span>
+        </div>
+        <p>© {new Date().getFullYear()} Daily Dose MCQ. All rights reserved.</p>
+        <p className="mt-2 text-xs text-slate-400">Crafted with passion for medical professionals.</p>
+      </footer>
+    </>
   );
 }
