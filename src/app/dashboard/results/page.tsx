@@ -83,20 +83,20 @@ export default function MyResultsPage() {
     : 0;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white pb-16">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 transition-colors duration-300">
       <Navbar />
 
       {/* Hero Header */}
       <div className="relative overflow-hidden pt-28 pb-12 px-4">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-950 via-slate-950 to-slate-950" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-slate-50 to-slate-100 dark:from-primary-950 dark:via-slate-950 dark:to-slate-950" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary-600/10 blur-3xl rounded-full pointer-events-none" />
         <div className="relative max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="text-xs font-bold uppercase tracking-widest text-primary-400 mb-2">Your Journey</p>
-            <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">
-              My <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-400">Results</span>
+            <p className="text-xs font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400 mb-2">Your Journey</p>
+            <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight text-slate-900 dark:text-white">
+              My <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400">Results</span>
             </h1>
-            <p className="text-slate-400 text-lg">Every test you've taken, preserved forever.</p>
+            <p className="text-slate-600 dark:text-slate-400 text-lg">Every test you've taken, preserved forever.</p>
           </motion.div>
 
           {/* Summary Cards */}
@@ -110,9 +110,9 @@ export default function MyResultsPage() {
                 { icon: Target,     label: "Avg Score",    value: `${avgScore}%`,      color: "text-emerald-400" },
                 { icon: Award,      label: "Best Score",   value: `${bestScore}%`,     color: "text-amber-400" },
               ].map((s, i) => (
-                <div key={i} className="rounded-2xl bg-white/5 border border-white/10 p-2 sm:p-4 text-center backdrop-blur-sm">
+                <div key={i} className="rounded-2xl bg-white/60 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2 sm:p-4 text-center backdrop-blur-sm shadow-sm dark:shadow-none">
                   <s.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${s.color} mx-auto mb-1`} />
-                  <div className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</div>
+                  <div className={`text-xl sm:text-2xl font-black ${s.color.replace('400', '600').replace('text-', 'text-slate-800 dark:text-')}`}>{s.value}</div>
                   <div className="text-[10px] sm:text-xs text-slate-500 mt-0.5 whitespace-nowrap">{s.label}</div>
                 </div>
               ))}
@@ -130,14 +130,14 @@ export default function MyResultsPage() {
             placeholder="Search by exam name or category..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+            className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors shadow-sm dark:shadow-none"
           />
           <div className="flex gap-2">
             {(["date", "score"] as const).map(s => (
               <button
                 key={s}
                 onClick={() => setSortBy(s)}
-                className={`px-5 py-3 rounded-xl text-sm font-bold transition-all ${sortBy === s ? "bg-primary-600 text-white" : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"}`}
+                className={`px-5 py-3 rounded-xl text-sm font-bold transition-all ${sortBy === s ? "bg-primary-600 text-white shadow-md shadow-primary-600/20" : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm dark:shadow-none"}`}
               >
                 {s === "date" ? "Latest First" : "Best Score"}
               </button>
@@ -149,14 +149,14 @@ export default function MyResultsPage() {
         {loading && (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 animate-pulse">
+              <div key={i} className="rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 p-6 animate-pulse shadow-sm dark:shadow-none">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-800" />
+                  <div className="w-14 h-14 rounded-2xl bg-slate-200 dark:bg-slate-800" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-48 bg-slate-800 rounded-lg" />
-                    <div className="h-3 w-32 bg-slate-800/70 rounded-lg" />
+                    <div className="h-4 w-48 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                    <div className="h-3 w-32 bg-slate-200 dark:bg-slate-800/70 rounded-lg" />
                   </div>
-                  <div className="w-20 h-10 bg-slate-800 rounded-xl" />
+                  <div className="w-20 h-10 bg-slate-200 dark:bg-slate-800 rounded-xl" />
                 </div>
               </div>
             ))}
@@ -169,8 +169,8 @@ export default function MyResultsPage() {
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="text-center py-24"
           >
-            <Trophy className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-slate-400 mb-2">No results yet</h3>
+            <Trophy className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-slate-600 dark:text-slate-400 mb-2">No results yet</h3>
             <p className="text-slate-500 mb-6">Take your first test to see your results here.</p>
             <Link href="/dashboard" className="inline-block px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white font-bold text-sm transition-colors">
               Browse Tests
@@ -187,7 +187,7 @@ export default function MyResultsPage() {
             <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
               <Trophy className="w-8 h-8 text-red-400" />
             </div>
-            <h3 className="text-xl font-bold text-slate-300 mb-2">Couldn&apos;t load results</h3>
+            <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-2">Couldn&apos;t load results</h3>
             <p className="text-slate-500 mb-6">There was a connection issue. Your results are safe.</p>
             <button
               onClick={loadResults}
@@ -218,7 +218,7 @@ export default function MyResultsPage() {
                   transition={{ delay: idx * 0.04 }}
                 >
                   <Link href={`/dashboard/results/${result._id}`}>
-                    <div className="group relative overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 hover:border-primary-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary-500/10 p-5 sm:p-6 cursor-pointer">
+                    <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary-500/10 p-5 sm:p-6 cursor-pointer shadow-sm dark:shadow-none">
 
                       {/* Subtle gradient on hover */}
                       <div className="absolute inset-0 bg-gradient-to-r from-primary-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -226,23 +226,23 @@ export default function MyResultsPage() {
                       <div className="relative flex items-center gap-4 sm:gap-6">
 
                         {/* Score Circle */}
-                        <div className={`relative flex-shrink-0 w-16 h-16 rounded-2xl flex flex-col items-center justify-center border-2 ${isPass ? "border-emerald-500/40 bg-emerald-500/10" : "border-red-500/40 bg-red-500/10"}`}>
-                          <span className={`text-xl font-black ${isPass ? "text-emerald-400" : "text-red-400"}`}>{pct}%</span>
+                        <div className={`relative flex-shrink-0 w-16 h-16 rounded-2xl flex flex-col items-center justify-center border-2 ${isPass ? "border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10" : "border-red-500/40 bg-red-50 dark:bg-red-500/10"}`}>
+                          <span className={`text-xl font-black ${isPass ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>{pct}%</span>
                         </div>
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <h3 className="font-bold text-white text-base group-hover:text-primary-300 transition-colors truncate">
+                            <h3 className="font-bold text-slate-900 dark:text-white text-base group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors truncate">
                               {result.examId?.title || "Unknown Exam"}
                             </h3>
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${grade.bg} ${grade.color}`}>
                               {grade.label}
                             </span>
                           </div>
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-400">
                             <span className="flex items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                               {result.score}/{result.totalQuestions} correct
                             </span>
                             <span className="flex items-center gap-1">
@@ -254,7 +254,7 @@ export default function MyResultsPage() {
                               {formatDate(result.submittedAt)}
                             </span>
                             {result.examId?.category && (
-                              <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700">
+                              <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                                 {result.examId.category}
                               </span>
                             )}
@@ -264,7 +264,7 @@ export default function MyResultsPage() {
                         {/* Score bar + CTA */}
                         <div className="hidden sm:flex flex-col items-end gap-2 flex-shrink-0">
                           {/* Mini progress bar */}
-                          <div className="w-28 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                          <div className="w-28 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                             <div
                               className={`h-full rounded-full transition-all ${isPass ? "bg-emerald-500" : "bg-red-500"}`}
                               style={{ width: `${pct}%` }}

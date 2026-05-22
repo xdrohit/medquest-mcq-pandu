@@ -271,11 +271,11 @@ export default function FullscreenExamEngine() {
                         className={`w-full text-left p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-base lg:text-lg flex items-center gap-4 ${
                           isSelected
                             ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10 text-slate-900 dark:text-white shadow-[0_0_20px_rgba(59,130,246,0.15)]"
-                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm dark:shadow-none"
+                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-50 dark:bg-slate-800 shadow-sm dark:shadow-none"
                         }`}
                       >
                         <div className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm ${
-                          isSelected ? "border-primary-500 bg-primary-500 text-white" : "border-slate-300 dark:border-slate-600 text-slate-500"
+                          isSelected ? "border-primary-500 bg-primary-500 text-slate-900 dark:text-white" : "border-slate-300 dark:border-slate-600 text-slate-500"
                         }`}>
                           {String.fromCharCode(65 + idx)}
                         </div>
@@ -290,7 +290,7 @@ export default function FullscreenExamEngine() {
             {/* Navigation Footer */}
             <div className="mt-auto pt-8 flex items-center justify-between">
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={handleClear} disabled={answers[currentIndex] === undefined} className="border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border">
+                <Button variant="ghost" onClick={handleClear} disabled={answers[currentIndex] === undefined} className="border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-50 dark:bg-slate-800 border">
                   Clear Selection
                 </Button>
               </div>
@@ -318,7 +318,7 @@ export default function FullscreenExamEngine() {
           <div className="h-full flex flex-col">
             <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Grid className="w-4 h-4 text-primary-600 dark:text-primary-400" /> Question Palette</h3>
-              <button onClick={() => setShowPalette(false)} className="lg:hidden p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setShowPalette(false)} className="lg:hidden p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white"><X className="w-5 h-5" /></button>
             </div>
             
             <div className="flex-1 overflow-y-auto p-4">
@@ -355,7 +355,7 @@ export default function FullscreenExamEngine() {
 
         {/* Overlay for mobile palette */}
         {showPalette && (
-          <div className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" onClick={() => setShowPalette(false)} />
+          <div className="fixed inset-0 bg-white dark:bg-slate-900/50 z-40 lg:hidden" onClick={() => setShowPalette(false)} />
         )}
       </div>
     </div>

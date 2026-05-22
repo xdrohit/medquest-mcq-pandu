@@ -69,15 +69,15 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
       <motion.div
         initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="relative z-10 w-full max-w-xl h-screen bg-slate-900 border-l border-slate-700 overflow-y-auto flex flex-col"
+        className="relative z-10 w-full max-w-xl h-screen bg-white dark:bg-slate-900 border-l border-slate-300 dark:border-slate-700 overflow-y-auto flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
           <div>
-            <h2 className="text-xl font-bold text-white">{isEdit ? "Edit Question" : "Add New MCQ"}</h2>
-            <p className="text-slate-400 text-sm mt-0.5">Fill in all details carefully.</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">{isEdit ? "Edit Question" : "Add New MCQ"}</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Fill in all details carefully.</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -92,11 +92,11 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
 
           {/* Exam Selector */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Exam / Course</label>
+            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Exam / Course</label>
             <select
               value={form.examId}
               onChange={e => setForm(f => ({ ...f, examId: e.target.value }))}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
               required
             >
               <option value="">-- Select Exam --</option>
@@ -108,22 +108,22 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
 
           {/* Question Text */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Question Text</label>
+            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Question Text</label>
             <textarea
               value={form.text}
               onChange={e => setForm(f => ({ ...f, text: e.target.value }))}
               rows={3}
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500 resize-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500 resize-none"
               placeholder="Enter the MCQ question..."
             />
           </div>
 
           {/* Options */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Options (select correct answer)</label>
+            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Options (select correct answer)</label>
             {form.options.map((opt: string, i: number) => (
-              <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${form.correctAnswer === i ? 'border-green-500/50 bg-green-500/10' : 'border-slate-700 bg-slate-800'}`}>
+              <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${form.correctAnswer === i ? 'border-green-500/50 bg-green-500/10' : 'border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}>
                 <button
                   type="button"
                   onClick={() => setForm(f => ({ ...f, correctAnswer: i }))}
@@ -136,7 +136,7 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
                   value={opt}
                   onChange={e => setOption(i, e.target.value)}
                   required
-                  className="flex-1 bg-transparent text-white text-sm focus:outline-none placeholder-slate-500"
+                  className="flex-1 bg-transparent text-slate-900 dark:text-white text-sm focus:outline-none placeholder-slate-500"
                   placeholder={`Option ${String.fromCharCode(65 + i)}`}
                 />
                 <span className={`text-xs font-bold px-2 py-0.5 rounded ${form.correctAnswer === i ? 'text-green-400' : 'text-slate-600'}`}>
@@ -148,12 +148,12 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
 
           {/* Explanation */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Explanation</label>
+            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Explanation</label>
             <textarea
               value={form.explanation}
               onChange={e => setForm(f => ({ ...f, explanation: e.target.value }))}
               rows={2}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500 resize-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500 resize-none"
               placeholder="Explain why the correct answer is right..."
             />
           </div>
@@ -161,22 +161,22 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
           {/* Difficulty + Topic */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Difficulty</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Difficulty</label>
               <select
                 value={form.difficulty}
                 onChange={e => setForm(f => ({ ...f, difficulty: e.target.value }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
               >
                 {DIFFICULTIES.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>)}
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Topic Tag</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Topic Tag</label>
               <input
                 type="text"
                 value={form.topic}
                 onChange={e => setForm(f => ({ ...f, topic: e.target.value }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
                 placeholder="e.g. Cardiology"
               />
             </div>
@@ -184,12 +184,12 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
 
           {/* Image URL */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Image URL (optional)</label>
+            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Image URL (optional)</label>
             <input
               type="url"
               value={form.imageUrl}
               onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
               placeholder="https://..."
             />
           </div>
@@ -199,13 +199,13 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
             <div className={`relative w-12 h-6 rounded-full transition-colors ${form.randomize ? 'bg-primary-500' : 'bg-slate-700'}`} onClick={() => setForm(f => ({ ...f, randomize: !f.randomize }))}>
               <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.randomize ? 'translate-x-7' : 'translate-x-1'}`} />
             </div>
-            <span className="text-sm text-slate-300 font-medium flex items-center gap-1.5"><Shuffle className="w-4 h-4" /> Randomize Options</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300 font-medium flex items-center gap-1.5"><Shuffle className="w-4 h-4" /> Randomize Options</span>
           </label>
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-800 sticky bottom-0 bg-slate-900 flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-medium transition-colors">
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 sticky bottom-0 bg-white dark:bg-slate-900 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800 text-sm font-medium transition-colors">
             Cancel
           </button>
           <button
@@ -213,7 +213,7 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
             form=""
             onClick={handleSubmit as any}
             disabled={saving}
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-slate-900 dark:text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {saving ? "Saving..." : isEdit ? "Update Question" : "Add Question"}
           </button>
@@ -309,14 +309,14 @@ Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central in
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-        className="relative z-10 w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden"
+        className="relative z-10 w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800">
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2"><Upload className="w-5 h-5 text-primary-400" /> Bulk Upload MCQs</h2>
-            <p className="text-slate-400 text-sm">Paste CSV data (Question, Opt A, Opt B, Opt C, Opt D, Answer, Explanation, Topic).</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><Upload className="w-5 h-5 text-primary-400" /> Bulk Upload MCQs</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Paste CSV data (Question, Opt A, Opt B, Opt C, Opt D, Answer, Explanation, Topic).</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-500 dark:text-slate-400"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="p-6 space-y-4">
@@ -327,10 +327,10 @@ Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central in
           )}
 
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Target Exam</label>
+            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Target Exam</label>
             <select
               value={examId} onChange={e => setExamId(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
             >
               <option value="">-- Select Exam --</option>
               {exams.map((ex: any) => <option key={ex._id} value={ex._id}>{ex.title}</option>)}
@@ -338,22 +338,22 @@ Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central in
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">CSV Data</label>
+            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">CSV Data</label>
             <textarea
               value={csvText} onChange={e => setCsvText(e.target.value)}
               rows={10}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-green-300 text-sm font-mono focus:outline-none focus:border-primary-500 resize-none whitespace-pre"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-green-300 text-sm font-mono focus:outline-none focus:border-primary-500 resize-none whitespace-pre"
               placeholder={sampleCsv}
             />
           </div>
 
           <div className="flex gap-3">
-            <button onClick={() => setCsvText(sampleCsv)} className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:bg-slate-800 text-sm transition-colors">
+            <button onClick={() => setCsvText(sampleCsv)} className="flex-1 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800 text-sm transition-colors">
               Load Sample CSV
             </button>
             <button
               onClick={handleUpload} disabled={uploading}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-slate-900 dark:text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {uploading ? "Uploading..." : "Upload Questions"}
             </button>
@@ -442,14 +442,14 @@ export default function AdminQuestionsPage() {
 
       {/* Top Header */}
       <div className="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <BookOpen className="text-primary-400 w-6 h-6" /> MCQ Management
         </h1>
         <div className="flex items-center gap-3">
-          <button onClick={() => setBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-sm font-medium transition-colors">
+          <button onClick={() => setBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-medium transition-colors">
             <Upload className="w-4 h-4" /> Bulk Upload
           </button>
-          <button onClick={() => setModalMode("add")} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold shadow-lg hover:opacity-90 transition-opacity">
+          <button onClick={() => setModalMode("add")} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-slate-900 dark:text-white text-sm font-bold shadow-lg hover:opacity-90 transition-opacity">
             <Plus className="w-4 h-4" /> Add Question
           </button>
         </div>
@@ -463,19 +463,19 @@ export default function AdminQuestionsPage() {
             <input
               type="text" placeholder="Search questions..."
               value={search} onChange={e => setSearch(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-primary-500"
             />
           </div>
           <select
             value={filterExam} onChange={e => setFilterExam(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500"
+            className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-primary-500"
           >
             <option value="">All Exams</option>
             {exams.map((ex: any) => <option key={ex._id} value={ex._id}>{ex.title}</option>)}
           </select>
           <select
             value={filterDiff} onChange={e => setFilterDiff(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500"
+            className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-primary-500"
           >
             <option value="">All Difficulties</option>
             {DIFFICULTIES.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>)}
@@ -489,26 +489,26 @@ export default function AdminQuestionsPage() {
         </div>
 
         {/* Questions Table */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left whitespace-nowrap min-w-[1000px]">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-800/50">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
                   <th className="p-4 w-10">
                     <input type="checkbox" checked={selected.length === questions.length && questions.length > 0} onChange={toggleAll} className="accent-primary-500 w-4 h-4 cursor-pointer" />
                   </th>
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Question</th>
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Exam</th>
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Topic</th>
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Difficulty</th>
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Question</th>
+                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Exam</th>
+                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Topic</th>
+                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Difficulty</th>
+                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   [...Array(5)].map((_, i) => (
-                    <tr key={i} className="border-b border-slate-800/50">
-                      <td colSpan={6} className="p-4"><div className="h-4 bg-slate-800 rounded animate-pulse" /></td>
+                    <tr key={i} className="border-b border-slate-200 dark:border-slate-800/50">
+                      <td colSpan={6} className="p-4"><div className="h-4 bg-slate-50 dark:bg-slate-800 rounded animate-pulse" /></td>
                     </tr>
                   ))
                 ) : questions.length === 0 ? (
@@ -523,13 +523,13 @@ export default function AdminQuestionsPage() {
                     key={q._id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className={`border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors ${selected.includes(q._id) ? 'bg-primary-900/20' : ''}`}
+                    className={`border-b border-slate-200 dark:border-slate-800/50 hover:bg-slate-50 dark:bg-slate-800/30 transition-colors ${selected.includes(q._id) ? 'bg-primary-900/20' : ''}`}
                   >
                     <td className="p-4">
                       <input type="checkbox" checked={selected.includes(q._id)} onChange={() => toggleSelect(q._id)} className="accent-primary-500 w-4 h-4 cursor-pointer" />
                     </td>
                     <td className="p-4 max-w-sm">
-                      <p className="text-white text-sm font-medium line-clamp-2">{q.text}</p>
+                      <p className="text-slate-900 dark:text-white text-sm font-medium line-clamp-2">{q.text}</p>
                       {q.randomize && <span className="text-xs text-purple-400 mt-1 flex items-center gap-1"><Shuffle className="w-3 h-3" /> Randomized</span>}
                     </td>
                     <td className="p-4">
@@ -539,7 +539,7 @@ export default function AdminQuestionsPage() {
                     </td>
                     <td className="p-4">
                       {q.topic ? (
-                        <span className="text-xs flex items-center gap-1 text-slate-400"><Tag className="w-3 h-3" />{q.topic}</span>
+                        <span className="text-xs flex items-center gap-1 text-slate-500 dark:text-slate-400"><Tag className="w-3 h-3" />{q.topic}</span>
                       ) : <span className="text-slate-600 text-xs">—</span>}
                     </td>
                     <td className="p-4">
@@ -549,10 +549,10 @@ export default function AdminQuestionsPage() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEdit(q)} className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-primary-400 transition-colors">
+                        <button onClick={() => openEdit(q)} className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary-400 transition-colors">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(q._id)} className="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors">
+                        <button onClick={() => handleDelete(q._id)} className="p-2 rounded-lg hover:bg-red-500/20 text-slate-500 dark:text-slate-400 hover:text-red-400 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

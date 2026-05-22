@@ -90,11 +90,11 @@ export default function AdminStudentsPage() {
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-              className="relative z-10 w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden"
+              className="relative z-10 w-full max-w-md bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl overflow-hidden"
             >
-              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-primary-400" /> Add New Admin</h2>
-                <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X className="w-5 h-5" /></button>
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-primary-400" /> Add New Admin</h2>
+                <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-500 dark:text-slate-400"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleAddAdmin} className="p-6 space-y-4">
                 {error && (
@@ -103,19 +103,19 @@ export default function AdminStudentsPage() {
                   </div>
                 )}
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Name</label>
-                  <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500" placeholder="Admin Name" />
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Name</label>
+                  <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500" placeholder="Admin Name" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Email</label>
-                  <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500" placeholder="admin@dailydosemcq.com" />
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Email</label>
+                  <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500" placeholder="admin@dailydosemcq.com" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Password</label>
-                  <input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary-500" placeholder="••••••••" />
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Password</label>
+                  <input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500" placeholder="••••••••" />
                 </div>
                 <div className="pt-2">
-                  <button type="submit" disabled={saving} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50">
+                  <button type="submit" disabled={saving} className="w-full py-3 rounded-xl bg-gradient-to-r from-primary-600 to-accent-500 text-slate-900 dark:text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50">
                     {saving ? "Creating Admin..." : "Create Admin Account"}
                   </button>
                 </div>
@@ -129,10 +129,10 @@ export default function AdminStudentsPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Admin</p>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
               <Users className="text-primary-400 w-7 h-7" /> Student Management
             </h1>
-            <p className="text-slate-400 text-sm mt-1">View and manage all registered students.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">View and manage all registered students.</p>
           </div>
           <button onClick={() => setModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold transition-colors shadow-lg shadow-primary-500/20">
             <Plus className="w-4 h-4" /> Add Admin
@@ -146,18 +146,18 @@ export default function AdminStudentsPage() {
             <input
               type="text" placeholder="Search students..." value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-primary-500"
             />
           </div>
           <span className="text-slate-500 text-sm">{students.length} students</span>
         </div>
 
         {/* Table */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left whitespace-nowrap min-w-[800px]">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-800/40">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Student</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Enrolled</th>
@@ -174,14 +174,14 @@ export default function AdminStudentsPage() {
                   </td>
                 </tr>
               ) : students.filter(s => s.name?.toLowerCase().includes(search.toLowerCase()) || s.email?.toLowerCase().includes(search.toLowerCase())).map((s, i) => (
-                <motion.tr key={s._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/20 transition-colors">
+                <motion.tr key={s._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }} className="border-b border-slate-200 dark:border-slate-800/50 last:border-0 hover:bg-slate-50 dark:bg-slate-800/20 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500/30 to-accent-400/30 flex items-center justify-center text-white font-bold text-sm border border-primary-500/20">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500/30 to-accent-400/30 flex items-center justify-center text-slate-900 dark:text-white font-bold text-sm border border-primary-500/20">
                         {s.name ? s.name.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div>
-                        <p className="text-white font-semibold text-sm flex items-center gap-2">
+                        <p className="text-slate-900 dark:text-white font-semibold text-sm flex items-center gap-2">
                           {s.name} {s.role === 'admin' && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded uppercase tracking-widest font-bold">Admin</span>}
                         </p>
                         <p className="text-slate-500 text-xs">{s.email}</p>
@@ -193,7 +193,7 @@ export default function AdminStudentsPage() {
                       ● Active
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-slate-300 text-sm font-semibold text-center">
+                  <td className="px-6 py-4 text-slate-700 dark:text-slate-300 text-sm font-semibold text-center">
                      -
                   </td>
                   <td className="px-6 py-4 text-slate-500 text-sm">
@@ -201,7 +201,7 @@ export default function AdminStudentsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 rounded-lg hover:bg-slate-700 text-slate-500 hover:text-primary-400 transition-colors"><Edit2 className="w-4 h-4" /></button>
+                      <button className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-400 transition-colors"><Edit2 className="w-4 h-4" /></button>
                       <button onClick={() => handleDelete(s._id)} className="p-2 rounded-lg hover:bg-red-500/15 text-slate-500 hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>

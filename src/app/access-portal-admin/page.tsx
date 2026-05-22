@@ -38,7 +38,7 @@ export default function AdminPortalPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-950">
+    <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       
       {/* Dark Ambient Orbs */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -51,18 +51,18 @@ export default function AdminPortalPage() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="backdrop-blur-3xl bg-slate-900/60 border border-slate-800 rounded-3xl p-10 shadow-2xl relative overflow-hidden"
+          className="backdrop-blur-3xl bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-10 shadow-2xl relative overflow-hidden"
         >
           {/* Top Edge Highlight */}
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
 
           <div className="flex justify-center mb-8">
-            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-950 border border-slate-800 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
               <ShieldAlert className="w-8 h-8" />
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-white mb-2 text-center tracking-wide uppercase text-slate-200">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-200 mb-2 text-center tracking-wide uppercase">
             Secure Access Portal
           </h1>
           <p className="text-slate-500 mb-8 text-center text-sm">
@@ -94,7 +94,7 @@ export default function AdminPortalPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 border border-slate-800 rounded-xl leading-5 bg-slate-950/50 text-slate-300 placeholder-slate-700 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all"
+                  className="block w-full pl-12 pr-4 py-4 border border-slate-300 dark:border-slate-800 rounded-xl leading-5 bg-white/50 dark:bg-slate-950/50 text-slate-900 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-700 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all shadow-sm dark:shadow-none"
                   placeholder="admin@system.local"
                 />
               </div>
@@ -111,7 +111,7 @@ export default function AdminPortalPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 border border-slate-800 rounded-xl leading-5 bg-slate-950/50 text-slate-300 placeholder-slate-700 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all"
+                  className="block w-full pl-12 pr-4 py-4 border border-slate-300 dark:border-slate-800 rounded-xl leading-5 bg-white/50 dark:bg-slate-950/50 text-slate-900 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-700 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all shadow-sm dark:shadow-none"
                   placeholder="••••••••"
                 />
               </div>
@@ -120,7 +120,7 @@ export default function AdminPortalPage() {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full mt-8 bg-slate-800 hover:bg-slate-700 text-white rounded-xl py-4 flex items-center justify-center gap-2 font-bold transition-all disabled:opacity-50 border border-slate-700 hover:border-slate-600 shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+              className="w-full mt-8 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl py-4 flex items-center justify-center gap-2 font-bold transition-all disabled:opacity-50 border border-slate-800 dark:border-slate-700 dark:hover:border-slate-600 shadow-lg"
             >
               {loading ? (
                  <div className="w-5 h-5 border-2 border-slate-500 border-t-white rounded-full animate-spin" />
