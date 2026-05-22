@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
@@ -68,15 +69,7 @@ export default function PrivacyPolicyPage() {
         </motion.div>
       </div>
 
-      {/* Simple Footer */}
-      <footer className="w-full bg-white border-t border-slate-200 py-8 px-6 text-center text-sm text-slate-500 mt-auto">
-        <div className="flex justify-center gap-6 mb-4">
-          <Link href="/about" className="hover:text-primary-600 transition-colors">About Us</Link>
-          <Link href="/privacy" className="hover:text-primary-600 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-primary-600 transition-colors">Terms & Conditions</Link>
-        </div>
-        <p>© {new Date().getFullYear()} Daily Dose MCQ. All rights reserved.</p>
-      </footer>
+      <Footer />
     </main>
   );
 }
