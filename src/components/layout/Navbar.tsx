@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, LogIn, LogOut, ChevronDown, User, LayoutDashboard, ShieldCheck, Menu, X } from "lucide-react";
 import { Button } from "../ui/Button";
-import { ThemeToggle } from "../ui/ThemeToggle";
 
 interface AuthUser {
   name: string;
@@ -73,8 +72,6 @@ export const Navbar = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
-            
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
             ) : user ? (
