@@ -103,17 +103,17 @@ export default function MyResultsPage() {
           {!loading && totalTests > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="grid grid-cols-3 gap-4 mt-8 max-w-lg"
+              className="grid grid-cols-3 gap-2 sm:gap-4 mt-8 max-w-lg"
             >
               {[
                 { icon: BookOpen,   label: "Tests Taken",  value: totalTests,         color: "text-primary-400" },
                 { icon: Target,     label: "Avg Score",    value: `${avgScore}%`,      color: "text-emerald-400" },
                 { icon: Award,      label: "Best Score",   value: `${bestScore}%`,     color: "text-amber-400" },
               ].map((s, i) => (
-                <div key={i} className="rounded-2xl bg-white/5 border border-white/10 p-4 text-center backdrop-blur-sm">
-                  <s.icon className={`w-5 h-5 ${s.color} mx-auto mb-1`} />
-                  <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+                <div key={i} className="rounded-2xl bg-white/5 border border-white/10 p-2 sm:p-4 text-center backdrop-blur-sm">
+                  <s.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${s.color} mx-auto mb-1`} />
+                  <div className={`text-xl sm:text-2xl font-black ${s.color}`}>{s.value}</div>
+                  <div className="text-[10px] sm:text-xs text-slate-500 mt-0.5 whitespace-nowrap">{s.label}</div>
                 </div>
               ))}
             </motion.div>

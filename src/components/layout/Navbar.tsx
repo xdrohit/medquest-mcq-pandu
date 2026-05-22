@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, LogIn, LogOut, ChevronDown, User, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Activity, LogIn, LogOut, ChevronDown, User, LayoutDashboard, ShieldCheck, Menu, X } from "lucide-react";
 import { Button } from "../ui/Button";
 import { ThemeToggle } from "../ui/ThemeToggle";
 
@@ -19,6 +19,7 @@ export const Navbar = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -42,7 +43,7 @@ export const Navbar = () => {
       className="fixed top-0 left-0 right-0 z-50 px-4 py-4"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="glass rounded-2xl px-6 py-3 flex items-center justify-between shadow-[0_8px_32px_rgba(37,99,235,0.1)]">
+        <div className="glass rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between shadow-[0_8px_32px_rgba(37,99,235,0.1)] relative z-50">
           
           <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 text-white shadow-[0_0_15px_rgba(14,165,233,0.5)] group-hover:shadow-[0_0_25px_rgba(14,165,233,0.8)] transition-shadow">
@@ -164,7 +165,46 @@ export const Navbar = () => {
             )}
           </div>
 
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden flex items-center ml-2">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden absolute left-4 right-4 top-[80px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden z-40"
+            >
+              <div className="flex flex-col p-4 gap-2">
+                <Link href={user ? "/dashboard" : "/"} onClick={() => setMobileMenuOpen(false)} className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/' ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                  Home
+                </Link>
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/dashboard' ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                  Dashboard
+                </Link>
+                {user && (
+                  <Link href="/dashboard/results" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/dashboard/results' ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                    Results
+                  </Link>
+                )}
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === '/dashboard' ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                  Leaderboard
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.header>
   );
