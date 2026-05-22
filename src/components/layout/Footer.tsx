@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Activity, Mail, Phone, MapPin, ChevronRight, ExternalLink } from "lucide-react";
 
 // ✅ Replace this with your actual Instagram username
-const INSTAGRAM_HANDLE = "daily_dose_mcq";
+const INSTAGRAM_HANDLE = "docmcq";
 const INSTAGRAM_URL = `https://www.instagram.com/${INSTAGRAM_HANDLE}`;
 
 function InstagramIcon({ className }: { className?: string }) {
