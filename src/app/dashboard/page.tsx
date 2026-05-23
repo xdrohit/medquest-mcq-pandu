@@ -25,6 +25,18 @@ export default function StudentDashboard() {
   const [generatingMock, setGeneratingMock] = useState(false);
   const router = useRouter();
 
+  const updateUrl = (catId: string | null, subId: string | null) => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (catId) url.searchParams.set('category', catId);
+    else url.searchParams.delete('category');
+    
+    if (subId) url.searchParams.set('sub', subId);
+    else url.searchParams.delete('sub');
+
+    window.history.replaceState({}, '', url.toString());
+  };
+
   useEffect(() => {
     const ts = Date.now();
 
@@ -55,7 +67,21 @@ export default function StudentDashboard() {
         }
         if (categoriesRes?.ok) {
           const cd = await categoriesRes.json();
-          setCategories(Array.isArray(cd) ? cd : []);
+          const cats = Array.isArray(cd) ? cd : [];
+          setCategories(cats);
+
+          if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const catId = params.get('category');
+            const subId = params.get('sub');
+            if (catId) {
+              const matchedCat = cats.find((c: any) => c._id === catId);
+              if (matchedCat) {
+                setSelectedCategory(matchedCat);
+                if (subId) setSelectedSubCategory(subId);
+              }
+            }
+          }
         }
       })
       .catch(() => setStats({}))
@@ -213,15 +239,15 @@ export default function StudentDashboard() {
               </div>
             ) : (
               categories.map((cat, idx) => {
-                // Calculate stats for this category
+                // Use the accurate mcqCount from the API
                 const catExams = exams.filter(e => e.category === cat.name);
-                const mcqCount = catExams.reduce((sum, e) => sum + (e.questionCount || 0), 0);
+                const mcqCount = cat.mcqCount || 0;
                 
                 return (
                   <motion.div
                     key={cat._id}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                    onClick={() => { setSelectedCategory(cat); setSelectedSubCategory(null); }}
+                    onClick={() => { setSelectedCategory(cat); setSelectedSubCategory(null); updateUrl(cat._id, null); }}
                     className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col h-full shadow-sm dark:shadow-none cursor-pointer"
                   >
                     <div className="flex justify-between items-start mb-6">
@@ -257,8 +283,13 @@ export default function StudentDashboard() {
             <div className="flex items-center gap-4 mb-6">
               <button 
                 onClick={() => {
-                  if (selectedSubCategory) setSelectedSubCategory(null);
-                  else setSelectedCategory(null);
+                  if (selectedSubCategory) {
+                    setSelectedSubCategory(null);
+                    updateUrl(selectedCategory._id, null);
+                  } else {
+                    setSelectedCategory(null);
+                    updateUrl(null, null);
+                  }
                 }}
                 className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
               >
@@ -279,16 +310,19 @@ export default function StudentDashboard() {
                   <motion.div
                     key={sub}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                    onClick={() => setSelectedSubCategory(sub)}
-                    className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col justify-center items-center h-40 shadow-sm dark:shadow-none cursor-pointer text-center"
+                    onClick={() => { setSelectedSubCategory(sub); updateUrl(selectedCategory._id, sub); }}
+                    className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col justify-center items-center h-40 shadow-sm dark:shadow-none cursor-pointer text-center relative overflow-hidden"
                   >
+                    <div className="absolute top-3 right-3 text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md flex items-center gap-1">
+                      <BookOpen className="w-3 h-3" /> {selectedCategory.subCategoryCounts?.[sub] || 0} MCQs
+                    </div>
                     <BookOpen className="w-8 h-8 text-primary-400 mb-3 group-hover:scale-110 transition-transform" />
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{sub}</h3>
                   </motion.div>
                 ))}
                 {/* View All Option */}
                 <motion.div
-                  onClick={() => setSelectedSubCategory("All")}
+                  onClick={() => { setSelectedSubCategory("All"); updateUrl(selectedCategory._id, "All"); }}
                   className="group rounded-3xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col justify-center items-center h-40 shadow-sm dark:shadow-none cursor-pointer text-center"
                 >
                   <ChevronRight className="w-8 h-8 text-primary-500 mb-3 group-hover:translate-x-2 transition-transform" />

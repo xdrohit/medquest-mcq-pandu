@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Category from '@/models/Category';
+import Question from '@/models/Question';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 
@@ -33,7 +34,39 @@ export async function GET(req: Request) {
     }
 
     const categories = await Category.find(query).sort({ name: 1 });
-    return NextResponse.json(categories, { status: 200 });
+
+    // Calculate total questions for each category and subcategory
+    const categoryStats = await Question.aggregate([
+      {
+        $group: {
+          _id: { categoryId: "$categoryId", subCategory: "$subCategory" },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const categoriesWithStats = categories.map(cat => {
+      const catObj = cat.toObject();
+      let totalMcqs = 0;
+      const subCategoryCounts: Record<string, number> = {};
+
+      categoryStats.forEach(stat => {
+        if (stat._id.categoryId && stat._id.categoryId.toString() === cat._id.toString()) {
+          totalMcqs += stat.count;
+          if (stat._id.subCategory) {
+             subCategoryCounts[stat._id.subCategory] = stat.count;
+          }
+        }
+      });
+
+      return {
+        ...catObj,
+        mcqCount: totalMcqs,
+        subCategoryCounts
+      };
+    });
+
+    return NextResponse.json(categoriesWithStats, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
