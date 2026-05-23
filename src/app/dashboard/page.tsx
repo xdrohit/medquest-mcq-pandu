@@ -5,14 +5,17 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
   Play, BookOpen, Activity, Target,
-  ChevronRight, Trophy, TrendingUp, AlertTriangle, CheckCircle2, Clock, Zap, Flame, Award, BarChart3, Shield
+  ChevronRight, Trophy, TrendingUp, AlertTriangle, CheckCircle2, Clock, Zap, Flame, Award, BarChart3, Shield, ArrowLeft
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState<"available" | "analytics">("available");
   const [exams, setExams] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   // Separate states so name shows INSTANTLY from JWT, stats come later
   const [authUser, setAuthUser] = useState<{ name: string; role: string } | null>(null);
   const [stats, setStats] = useState<any | null>(null);
@@ -31,8 +34,9 @@ export default function StudentDashboard() {
     Promise.all([
       fetch(`/api/user/profile?t=${ts}`, { cache: "no-store" }),
       fetch(`/api/exams?t=${ts}`, { cache: "no-store" }),
+      fetch(`/api/categories?t=${ts}`, { cache: "no-store" }),
     ])
-      .then(async ([profileRes, examsRes]) => {
+      .then(async ([profileRes, examsRes, categoriesRes]) => {
         if (profileRes.ok) {
           const pd = await profileRes.json();
           setStats(pd?.stats ?? {});
@@ -44,6 +48,10 @@ export default function StudentDashboard() {
         if (examsRes.ok) {
           const ed = await examsRes.json();
           setExams(Array.isArray(ed) ? ed : []);
+        }
+        if (categoriesRes?.ok) {
+          const cd = await categoriesRes.json();
+          setCategories(Array.isArray(cd) ? cd : []);
         }
       })
       .catch(() => setStats({}))
@@ -152,55 +160,120 @@ export default function StudentDashboard() {
           </button>
         </div>
 
-        {/* Available Tests Grid */}
-        {activeTab === "available" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Available Tests / Categories Grid */}
+        {activeTab === "available" && selectedCategory === null && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {statsLoading ? (
               // Skeleton Loaders
               [1, 2, 3].map((n) => (
                 <div key={n} className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col h-full shadow-sm dark:shadow-none animate-pulse">
                   <div className="flex justify-between items-start mb-6">
-                    <div className="w-20 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg" />
-                    <div className="w-16 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                    <div className="w-12 h-12 bg-slate-200 dark:bg-slate-800 rounded-xl" />
                   </div>
                   <div className="w-3/4 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg mb-4" />
-                  <div className="w-full h-16 bg-slate-200 dark:bg-slate-800 rounded-lg mb-8" />
+                  <div className="w-1/2 h-4 bg-slate-200 dark:bg-slate-800 rounded-lg mb-8" />
                   <div className="w-full h-12 bg-slate-200 dark:bg-slate-800 rounded-xl mt-auto" />
                 </div>
               ))
-            ) : exams.length === 0 ? (
+            ) : categories.length === 0 ? (
               <div className="col-span-full py-20 text-center">
                 <BookOpen className="w-12 h-12 text-slate-400 dark:text-slate-700 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-slate-500 dark:text-slate-400">No active tests found</h3>
+                <h3 className="text-xl font-bold text-slate-500 dark:text-slate-400">No categories found</h3>
               </div>
             ) : (
-              exams.map((exam, idx) => (
-                <motion.div
-                  key={exam._id}
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                  className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col h-full shadow-sm dark:shadow-none"
-                >
-                  <div className="flex justify-between items-start mb-6">
-                    <span className="px-3 py-1 rounded-lg text-xs font-bold bg-primary-50 text-primary-600 border border-primary-100 dark:bg-primary-500/10 dark:text-primary-400 dark:border-primary-500/20">
-                      {exam.category}
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
-                      <Clock className="w-3.5 h-3.5" /> {exam.durationMinutes}m
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{exam.title}</h3>
-                  <p className="text-slate-500 text-sm mb-8 flex-grow line-clamp-2">
-                    {exam.description || `Comprehensive mock exam covering key concepts for your medical preparation.`}
-                  </p>
-                  <Link href={`/exam/${exam._id}`}>
-                    <Button className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 dark:hover:bg-primary-600 text-slate-900 dark:text-white hover:text-white rounded-xl py-3 transition-colors border border-slate-200 dark:border-slate-700 hover:border-primary-500 group-hover:bg-primary-600 group-hover:text-white font-bold">
-                      Start Mission <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </motion.div>
-              ))
+              categories.map((cat, idx) => {
+                // Calculate stats for this category
+                const catExams = exams.filter(e => e.category === cat.name);
+                const mcqCount = catExams.reduce((sum, e) => sum + (e.questionCount || 0), 0);
+                
+                return (
+                  <motion.div
+                    key={cat._id}
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
+                    onClick={() => setSelectedCategory(cat)}
+                    className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col h-full shadow-sm dark:shadow-none cursor-pointer"
+                  >
+                    <div className="flex justify-between items-start mb-6">
+                      <div className={`w-14 h-14 rounded-2xl ${cat.color || 'bg-primary-50 border-primary-200 border-2'} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                        <CategoryIcon name={cat.icon || 'BookOpen'} className={`w-7 h-7 ${cat.color ? '' : 'text-primary-500'}`} />
+                      </div>
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
+                        {catExams.length} Tests
+                      </span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{cat.name}</h3>
+                    <p className="text-slate-500 text-sm mb-8 flex-grow">
+                      {cat.description || "Practice Questions"}
+                    </p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <div className="text-sm font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                         <BookOpen className="w-4 h-4" /> {mcqCount} MCQs
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary-500 group-hover:text-white text-slate-400 transition-colors">
+                        <ChevronRight className="w-5 h-5" />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })
             )}
-          </div>
+          </motion.div>
+        )}
+
+        {/* Exams List for Selected Category */}
+        {activeTab === "available" && selectedCategory !== null && (
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+            <div className="flex items-center gap-4 mb-6">
+              <button 
+                onClick={() => setSelectedCategory(null)}
+                className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <CategoryIcon name={selectedCategory.icon || 'BookOpen'} className="w-6 h-6 text-primary-500" />
+                  {selectedCategory.name} Tests
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Select a test to start your mission</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {exams.filter(e => e.category === selectedCategory.name).length === 0 ? (
+                <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+                  <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-slate-500 dark:text-slate-400">No tests available in this category yet.</h3>
+                </div>
+              ) : (
+                exams.filter(e => e.category === selectedCategory.name).map((exam, idx) => (
+                  <motion.div
+                    key={exam._id}
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
+                    className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col h-full shadow-sm dark:shadow-none"
+                  >
+                    <div className="flex justify-between items-start mb-6">
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
+                        <BookOpen className="w-3.5 h-3.5" /> {exam.questionCount || 0} MCQs
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
+                        <Clock className="w-3.5 h-3.5" /> {exam.durationMinutes}m
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{exam.title}</h3>
+                    <p className="text-slate-500 text-sm mb-8 flex-grow line-clamp-2">
+                      {exam.description || `Comprehensive mock exam covering key concepts for your medical preparation.`}
+                    </p>
+                    <Link href={`/exam/${exam._id}`}>
+                      <Button className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 dark:hover:bg-primary-600 text-slate-900 dark:text-white hover:text-white rounded-xl py-3 transition-colors border border-slate-200 dark:border-slate-700 hover:border-primary-500 group-hover:bg-primary-600 group-hover:text-white font-bold">
+                        Start Mission <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </motion.div>
         )}
 
         {/* Analytics Tab */}
