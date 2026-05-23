@@ -14,14 +14,20 @@ const COLOR_PRESETS = [
   { label: "Emerald (Pharmacy Style)", value: "bg-emerald-50 border-emerald-200 border-2", text: "text-emerald-500" },
   { label: "Amber (Paramedical Style)", value: "bg-amber-50 border-amber-200 border-2", text: "text-amber-500" },
   { label: "Sky Blue (BDS Style)", value: "bg-sky-50 border-sky-200 border-2", text: "text-sky-500" },
-  { label: "Deep Violet", value: "bg-violet-50 border-violet-200 border-2", text: "text-violet-500" },
-  { label: "Teal Green", value: "bg-teal-50 border-teal-200 border-2", text: "text-teal-500" },
+  { label: "Deep Violet (Neuro)", value: "bg-violet-50 border-violet-200 border-2", text: "text-violet-500" },
+  { label: "Teal Green (Surgery)", value: "bg-teal-50 border-teal-200 border-2", text: "text-teal-500" },
+  { label: "Cute Pink (Pandu Theme 🎀)", value: "bg-pink-50 border-pink-200 border-2", text: "text-pink-500" },
+  { label: "Fuchsia (Ortho/Bones)", value: "bg-fuchsia-50 border-fuchsia-200 border-2", text: "text-fuchsia-500" },
+  { label: "Orange (Pediatrics)", value: "bg-orange-50 border-orange-200 border-2", text: "text-orange-500" },
+  { label: "Cyan (ENT/Eye)", value: "bg-cyan-50 border-cyan-200 border-2", text: "text-cyan-500" },
+  { label: "Red (Blood/Heart)", value: "bg-red-50 border-red-200 border-2", text: "text-red-500" },
 ];
 
 const POPULAR_ICONS = [
   "Brain", "Stethoscope", "Pill", "Activity", "Microscope", "HeartPulse",
   "Sparkles", "ShieldCheck", "ClipboardList", "BookOpen", "Dna", "GraduationCap",
-  "Heart", "Activity", "Trophy"
+  "Heart", "Trophy", "Bone", "Smile", "Wind", "Ear", "Eye", "Baby",
+  "Scissors", "Radiation", "Droplet", "TestTube", "Syringe", "Sun"
 ];
 
 const emptyForm = {
