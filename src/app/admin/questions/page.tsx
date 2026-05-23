@@ -476,11 +476,22 @@ export default function AdminQuestionsPage() {
     if (filterDiff) params.set("difficulty", filterDiff);
     if (search) params.set("search", search);
     const timestamp = Date.now();
+    const qs = params.toString();
+    const queryStr = qs ? `${qs}&t=${timestamp}` : `t=${timestamp}`;
+    
+    const fetchOpts = {
+      cache: "no-store" as RequestCache,
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache"
+      }
+    };
+
     try {
       const [qRes, eRes, cRes] = await Promise.all([
-        fetch(`/api/admin/questions?${params}&t=${timestamp}`, { cache: "no-store" }),
-        fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }),
-        fetch(`/api/categories?all=true&t=${timestamp}`, { cache: "no-store" }),
+        fetch(`/api/admin/questions?${queryStr}`, fetchOpts),
+        fetch(`/api/exams?all=true&t=${timestamp}`, fetchOpts),
+        fetch(`/api/categories?all=true&t=${timestamp}`, fetchOpts),
       ]);
       const qData = await qRes.json();
       const eData = await eRes.json();
@@ -528,11 +539,11 @@ export default function AdminQuestionsPage() {
             categories={categories}
             question={modalMode === "edit" ? editQuestion : undefined}
             onClose={() => { setModalMode(null); setEditQuestion(null); }}
-            onSaved={() => { setModalMode(null); setEditQuestion(null); fetchAll(); }}
+            onSaved={() => { setModalMode(null); setEditQuestion(null); setTimeout(() => fetchAll(), 500); }}
           />
         )}
         {bulkModal && (
-          <BulkUploadModal exams={exams} categories={categories} onClose={() => setBulkModal(false)} onSaved={() => { setBulkModal(false); fetchAll(); }} />
+          <BulkUploadModal exams={exams} categories={categories} onClose={() => setBulkModal(false)} onSaved={() => { setBulkModal(false); setTimeout(() => fetchAll(), 500); }} />
         )}
       </AnimatePresence>
 
