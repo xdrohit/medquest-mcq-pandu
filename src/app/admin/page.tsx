@@ -14,21 +14,28 @@ import {
 
 export default function AdminDashboard() {
   const [exams, setExams] = useState<any[]>([]);
-  const [stats, setStats] = useState({ totalExams: 0, totalQuestions: 0 });
+  const [stats, setStats] = useState({ totalExams: 0, totalQuestions: 0, totalStudents: 0, totalTestsTaken: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timestamp = Date.now();
     Promise.all([
       fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }).then(r => r.json()),
-      fetch(`/api/admin/questions?t=${timestamp}`, { cache: "no-store" }).then(r => r.json()),
-    ]).then(([examsData, questionsData]) => {
+      fetch(`/api/admin/stats?t=${timestamp}`, { cache: "no-store" }).then(r => r.json()),
+    ]).then(([examsData, statsData]) => {
       const examList = Array.isArray(examsData) ? examsData : [];
-      const qList = Array.isArray(questionsData) ? questionsData : [];
       setExams(examList);
-      setStats({ totalExams: examList.length, totalQuestions: qList.length });
+      setStats({ 
+        totalExams: statsData.totalExams || 0, 
+        totalQuestions: statsData.totalQuestions || 0,
+        totalStudents: statsData.totalStudents || 0,
+        totalTestsTaken: statsData.totalTestsTaken || 0
+      });
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => {
+      console.error(err);
+      setLoading(false);
+    });
   }, []);
 
   const handleLogout = async () => {
@@ -39,8 +46,8 @@ export default function AdminDashboard() {
   const statCards = [
     { label: "Total Exams", value: loading ? "—" : stats.totalExams, sub: "Ready for your students 🎀", icon: ClipboardList, color: "text-pink-600 dark:text-pink-400", ring: "ring-pink-300 dark:ring-pink-500/30", bg: "from-pink-100 dark:from-pink-500/20 to-transparent", quote: "Icchu's empire is growing! 🐼" },
     { label: "Total MCQs", value: loading ? "—" : stats.totalQuestions, sub: "Cuteness overloaded in Question Bank 🌸", icon: BookOpen, color: "text-rose-600 dark:text-rose-400", ring: "ring-rose-300 dark:ring-rose-500/30", bg: "from-rose-100 dark:from-rose-500/20 to-transparent", quote: "Even Pandas need a break, but you are unstoppable! 💕" },
-    { label: "Active Students", value: "0", sub: "Registered users", icon: Users, color: "text-fuchsia-600 dark:text-fuchsia-400", ring: "ring-fuchsia-300 dark:ring-fuchsia-500/30", bg: "from-fuchsia-100 dark:from-fuchsia-500/20 to-transparent", quote: "Everyone loves your platform! 🥰" },
-    { label: "Tests Taken", value: "0", sub: "All time submissions", icon: TrendingUp, color: "text-pink-600 dark:text-pink-400", ring: "ring-pink-300 dark:ring-pink-500/30", bg: "from-pink-100 dark:from-pink-500/20 to-transparent", quote: "Keep spreading the knowledge! ✨" },
+    { label: "Active Students", value: loading ? "—" : stats.totalStudents, sub: "Registered users", icon: Users, color: "text-fuchsia-600 dark:text-fuchsia-400", ring: "ring-fuchsia-300 dark:ring-fuchsia-500/30", bg: "from-fuchsia-100 dark:from-fuchsia-500/20 to-transparent", quote: "Everyone loves your platform! 🥰" },
+    { label: "Tests Taken", value: loading ? "—" : stats.totalTestsTaken, sub: "All time submissions", icon: TrendingUp, color: "text-pink-600 dark:text-pink-400", ring: "ring-pink-300 dark:ring-pink-500/30", bg: "from-pink-100 dark:from-pink-500/20 to-transparent", quote: "Keep spreading the knowledge! ✨" },
   ];
 
   const quickActions = [
