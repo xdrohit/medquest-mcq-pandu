@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, ClipboardList, Users, CreditCard,
-  LogOut, Activity, ShieldCheck, Menu, X
+  LogOut, Activity, ShieldCheck, Menu, X, Tag
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/categories", label: "Category Manager", icon: Tag },
   { href: "/admin/questions", label: "MCQ Manager", icon: BookOpen },
   { href: "/admin/tests", label: "Test Management", icon: ClipboardList },
   { href: "/admin/students", label: "Students", icon: Users },

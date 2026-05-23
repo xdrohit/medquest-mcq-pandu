@@ -9,7 +9,7 @@ import {
   CheckCircle, AlertTriangle, Save
 } from "lucide-react";
 
-const CATEGORIES = ["MBBS", "Nursing", "Pharmacy", "BDS", "Paramedical"];
+// Categories will be loaded dynamically from DB
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   draft: { label: "Draft", color: "bg-slate-500/20 text-slate-500 dark:text-slate-400 border-slate-500/30", icon: <FileText className="w-3 h-3" /> },
@@ -33,7 +33,7 @@ const emptyForm = {
 };
 
 // ─── Exam Form Modal ───────────────────────────────────────────────────────────
-function ExamModal({ exam, onClose, onSaved }: { exam?: any; onClose: () => void; onSaved: () => void }) {
+function ExamModal({ exam, categories, onClose, onSaved }: { exam?: any; categories: any[]; onClose: () => void; onSaved: () => void }) {
   const isEdit = !!exam;
   const [form, setForm] = useState(() => {
     if (!exam) return emptyForm;
@@ -140,7 +140,8 @@ function ExamModal({ exam, onClose, onSaved }: { exam?: any; onClose: () => void
             <div>
               <label className={LabelClass}>Category</label>
               <select value={form.category} onChange={e => set("category", e.target.value)} className={InputClass}>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                <option value="">Select Category</option>
+                {categories.map(c => <option key={c._id || c.name} value={c.name}>{c.name}</option>)}
               </select>
             </div>
           </div>
@@ -239,11 +240,19 @@ function ExamModal({ exam, onClose, onSaved }: { exam?: any; onClose: () => void
 // ─── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function AdminTestsPage() {
   const [exams, setExams] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editExam, setEditExam] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data)) setCategories(data); })
+      .catch(err => console.error("Error loading categories:", err));
+  }, []);
 
   const fetchExams = useCallback(async () => {
     setLoading(true);
@@ -294,6 +303,7 @@ export default function AdminTestsPage() {
         {modalOpen && (
           <ExamModal
             exam={editExam}
+            categories={categories}
             onClose={() => { setModalOpen(false); setEditExam(null); }}
             onSaved={() => { setModalOpen(false); setEditExam(null); fetchExams(); }}
           />

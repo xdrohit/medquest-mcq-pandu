@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Exam from '@/models/Exam';
 import Question from '@/models/Question';
 import User from '@/models/User';
+import Category from '@/models/Category';
 import bcrypt from 'bcrypt';
 
 export async function GET() {
@@ -28,6 +29,24 @@ export async function GET() {
         password: hashedPassword,
         role: 'admin'
       });
+    }
+
+    // Seed Categories
+    const defaultCategories = [
+      { name: 'MBBS', description: '1200+ Questions', icon: 'Brain', color: 'bg-primary-50 border-primary-200 border-2' },
+      { name: 'Nursing', description: '900+ Questions', icon: 'Stethoscope', color: 'bg-rose-50 border-rose-200 border-2' },
+      { name: 'Pharmacy', description: '600+ Questions', icon: 'Pill', color: 'bg-emerald-50 border-emerald-200 border-2' },
+      { name: 'Paramedical', description: '400+ Questions', icon: 'Activity', color: 'bg-amber-50 border-amber-200 border-2' },
+      { name: 'BDS', description: '300+ Questions', icon: 'Sparkles', color: 'bg-sky-50 border-sky-200 border-2' },
+      { name: 'Lab Technician', description: '500+ Questions', icon: 'Microscope', color: 'bg-indigo-50 border-indigo-200 border-2' },
+      { name: 'ANM/GNM', description: '800+ Questions', icon: 'HeartPulse', color: 'bg-teal-50 border-teal-200 border-2' }
+    ];
+
+    for (const cat of defaultCategories) {
+      const exists = await Category.findOne({ name: cat.name });
+      if (!exists) {
+        await Category.create(cat);
+      }
     }
 
     // Seed Exams

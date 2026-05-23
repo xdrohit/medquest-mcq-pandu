@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { GlassCard } from "@/components/ui/GlassCard";
 import Link from "next/link";
 import { Footer } from "@/components/layout/Footer";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 30 },
@@ -21,12 +22,33 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function HomePage() {
-  const categories = [
-    { name: "MBBS", icon: <Brain className="w-7 h-7 text-primary-500" />, count: "1200+ Questions", color: "bg-primary-50 border-primary-200" },
-    { name: "Nursing", icon: <Stethoscope className="w-7 h-7 text-rose-500" />, count: "900+ Questions", color: "bg-rose-50 border-rose-200" },
-    { name: "Pharmacy", icon: <Pill className="w-7 h-7 text-emerald-500" />, count: "600+ Questions", color: "bg-emerald-50 border-emerald-200" },
-    { name: "Paramedical", icon: <Activity className="w-7 h-7 text-amber-500" />, count: "400+ Questions", color: "bg-amber-50 border-amber-200" },
-  ];
+  const [categories, setCategories] = React.useState<any[]>([]);
+  const [loadingCategories, setLoadingCategories] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCategories(data);
+        }
+      })
+      .catch((err) => console.error("Error loading categories:", err))
+      .finally(() => setLoadingCategories(false));
+  }, []);
+
+  const getTextColor = (colorStr: string) => {
+    if (!colorStr) return 'text-slate-500';
+    if (colorStr.includes('primary')) return 'text-primary-500';
+    if (colorStr.includes('rose')) return 'text-rose-500';
+    if (colorStr.includes('emerald')) return 'text-emerald-500';
+    if (colorStr.includes('amber')) return 'text-amber-500';
+    if (colorStr.includes('indigo')) return 'text-indigo-500';
+    if (colorStr.includes('teal')) return 'text-teal-500';
+    if (colorStr.includes('sky')) return 'text-sky-500';
+    if (colorStr.includes('blue')) return 'text-blue-500';
+    return 'text-slate-500';
+  };
 
   const stats = [
     { icon: <Users className="w-5 h-5" />, value: "5,000+", label: "Active Students", color: "text-primary-600" },
@@ -184,21 +206,31 @@ export default function HomePage() {
             <p className="text-slate-500 mt-3 max-w-xl mx-auto">Whether you&apos;re in Nursing, MBBS, Pharmacy or BDS — we have the right question bank for you.</p>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {categories.map((cat, idx) => (
-              <motion.div key={cat.name} {...fadeUp(0.1 * idx)}>
-                <Link href="/register">
-                  <div className={`group border-2 ${cat.color} rounded-2xl p-6 flex flex-col items-center gap-4 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all bg-white`}>
-                    <div className="p-3 rounded-xl bg-white shadow-sm group-hover:scale-110 transition-transform">
-                      {cat.icon}
+            {loadingCategories ? (
+              [...Array(4)].map((_, idx) => (
+                <div key={idx} className="border-2 border-slate-200 rounded-2xl p-6 flex flex-col items-center gap-4 text-center bg-white animate-pulse">
+                  <div className="w-12 h-12 rounded-xl bg-slate-200" />
+                  <div className="w-20 h-4 bg-slate-200 rounded mt-2" />
+                  <div className="w-24 h-3 bg-slate-100 rounded mt-1" />
+                </div>
+              ))
+            ) : (
+              categories.map((cat, idx) => (
+                <motion.div key={cat.name} {...fadeUp(0.08 * idx)}>
+                  <Link href="/register">
+                    <div className={`group border-2 ${cat.color || 'bg-slate-50 border-slate-200'} rounded-2xl p-6 flex flex-col items-center gap-4 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all bg-white`}>
+                      <div className="p-3 rounded-xl bg-white shadow-sm group-hover:scale-110 transition-transform">
+                        <CategoryIcon name={cat.icon} className={`w-7 h-7 ${getTextColor(cat.color || '')}`} />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900">{cat.name}</h3>
+                        <p className="text-xs text-slate-500 mt-1">{cat.description || 'Practice Questions'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900">{cat.name}</h3>
-                      <p className="text-xs text-slate-500 mt-1">{cat.count}</p>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              ))
+            )}
           </div>
         </section>
 

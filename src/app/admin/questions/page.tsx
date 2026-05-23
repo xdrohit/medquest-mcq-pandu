@@ -8,7 +8,7 @@ import {
   ChevronDown, X, Check, AlertCircle, Shuffle, Image as ImageIcon, Tag
 } from "lucide-react";
 
-const CATEGORIES = ["MBBS", "Nursing", "Pharmacy", "BDS", "Paramedical"];
+// Dynamic categories are managed via Exam categories in DB
 const DIFFICULTIES = ["easy", "medium", "hard"];
 
 const difficultyColor: Record<string, string> = {
