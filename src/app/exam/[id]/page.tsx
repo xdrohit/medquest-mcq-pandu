@@ -34,9 +34,9 @@ export default function FullscreenExamEngine() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const examRes = await fetch("/api/exams", { cache: "no-store" });
-        const allExams = await examRes.json();
-        const currentExam = allExams.find((e: any) => e._id === id);
+        const examRes = await fetch(`/api/exams?id=${id}`, { cache: "no-store" });
+        const exams = await examRes.json();
+        const currentExam = exams.length > 0 ? exams[0] : null;
         
         const questionsRes = await fetch(`/api/exams/${id}/questions`, { cache: "no-store" });
         const examQuestions = await questionsRes.json();

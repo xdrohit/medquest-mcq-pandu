@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
   Play, BookOpen, Activity, Target,
@@ -16,10 +17,13 @@ export default function StudentDashboard() {
   const [exams, setExams] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
   // Separate states so name shows INSTANTLY from JWT, stats come later
   const [authUser, setAuthUser] = useState<{ name: string; role: string } | null>(null);
   const [stats, setStats] = useState<any | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [generatingMock, setGeneratingMock] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const ts = Date.now();
@@ -77,6 +81,33 @@ export default function StudentDashboard() {
     else if (!isSpeedDemon && isAccuracyKing) performanceText = "Great accuracy, but try to improve your speed.";
     else performanceText = "Work on both speed and accuracy. Focus on weak concepts.";
   }
+
+  const handleQuickPractice = async () => {
+    if (!selectedCategory) return;
+    setGeneratingMock(true);
+    try {
+      const res = await fetch("/api/exams/quick-practice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoryId: selectedCategory._id,
+          subCategory: selectedSubCategory || "All"
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.examId) {
+        router.push(`/exam/${data.examId}`);
+      } else {
+        alert(data.error || "Failed to generate mock test.");
+        setGeneratingMock(false);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred.");
+      setGeneratingMock(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pt-20 pb-12 overflow-hidden selection:bg-primary-500/30 transition-colors duration-300">
       <Navbar />
@@ -190,7 +221,7 @@ export default function StudentDashboard() {
                   <motion.div
                     key={cat._id}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => { setSelectedCategory(cat); setSelectedSubCategory(null); }}
                     className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col h-full shadow-sm dark:shadow-none cursor-pointer"
                   >
                     <div className="flex justify-between items-start mb-6">
@@ -220,12 +251,15 @@ export default function StudentDashboard() {
           </motion.div>
         )}
 
-        {/* Exams List for Selected Category */}
+        {/* Exams List / Subcategories for Selected Category */}
         {activeTab === "available" && selectedCategory !== null && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
             <div className="flex items-center gap-4 mb-6">
               <button 
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => {
+                  if (selectedSubCategory) setSelectedSubCategory(null);
+                  else setSelectedCategory(null);
+                }}
                 className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -233,20 +267,58 @@ export default function StudentDashboard() {
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <CategoryIcon name={selectedCategory.icon || 'BookOpen'} className="w-6 h-6 text-primary-500" />
-                  {selectedCategory.name} Tests
+                  {selectedCategory.name} {selectedSubCategory && selectedSubCategory !== "All" && `> ${selectedSubCategory}`}
                 </h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Select a test to start your mission</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {exams.filter(e => e.category === selectedCategory.name).length === 0 ? (
-                <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-                  <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-slate-500 dark:text-slate-400">No tests available in this category yet.</h3>
+            {selectedCategory.subCategories?.length > 0 && selectedSubCategory === null ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {selectedCategory.subCategories.map((sub: string, idx: number) => (
+                  <motion.div
+                    key={sub}
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
+                    onClick={() => setSelectedSubCategory(sub)}
+                    className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col justify-center items-center h-40 shadow-sm dark:shadow-none cursor-pointer text-center"
+                  >
+                    <BookOpen className="w-8 h-8 text-primary-400 mb-3 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{sub}</h3>
+                  </motion.div>
+                ))}
+                {/* View All Option */}
+                <motion.div
+                  onClick={() => setSelectedSubCategory("All")}
+                  className="group rounded-3xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col justify-center items-center h-40 shadow-sm dark:shadow-none cursor-pointer text-center"
+                >
+                  <ChevronRight className="w-8 h-8 text-primary-500 mb-3 group-hover:translate-x-2 transition-transform" />
+                  <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 leading-tight">View All Tests</h3>
+                </motion.div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex justify-end mb-6">
+                  <Button 
+                    onClick={handleQuickPractice} 
+                    disabled={generatingMock}
+                    className="bg-accent-500 hover:bg-accent-600 text-white rounded-xl py-2 px-6 font-bold flex items-center gap-2 shadow-lg shadow-accent-500/20"
+                  >
+                    {generatingMock ? (
+                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating...</>
+                    ) : (
+                      <><Zap className="w-5 h-5" /> Quick Practice (20 MCQs)</>
+                    )}
+                  </Button>
                 </div>
-              ) : (
-                exams.filter(e => e.category === selectedCategory.name).map((exam, idx) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {exams.filter(e => e.category === selectedCategory.name && (!selectedSubCategory || selectedSubCategory === "All" || e.subCategory === selectedSubCategory)).length === 0 ? (
+                    <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+                      <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+                      <h3 className="text-lg font-bold text-slate-500 dark:text-slate-400">No official tests available in this category.</h3>
+                      <p className="text-slate-500 mt-2">Use the Quick Practice button above to generate a mock test from the Question Bank!</p>
+                    </div>
+                  ) : (
+                    exams.filter(e => e.category === selectedCategory.name && (!selectedSubCategory || selectedSubCategory === "All" || e.subCategory === selectedSubCategory)).map((exam, idx) => (
                   <motion.div
                     key={exam._id}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
@@ -273,6 +345,8 @@ export default function StudentDashboard() {
                 ))
               )}
             </div>
+              </div>
+            )}
           </motion.div>
         )}
 

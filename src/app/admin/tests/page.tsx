@@ -21,6 +21,7 @@ const emptyForm = {
   title: "",
   description: "",
   category: "MBBS",
+  subCategory: "",
   durationMinutes: 30,
   negativeMarking: 0,
   passingMarks: 0,
@@ -41,6 +42,7 @@ function ExamModal({ exam, categories, onClose, onSaved }: { exam?: any; categor
       title: exam.title || "",
       description: exam.description || "",
       category: exam.category || "MBBS",
+      subCategory: exam.subCategory || "",
       durationMinutes: exam.durationMinutes || 30,
       negativeMarking: exam.negativeMarking ?? 0,
       passingMarks: exam.passingMarks ?? 0,
@@ -139,12 +141,28 @@ function ExamModal({ exam, categories, onClose, onSaved }: { exam?: any; categor
             </div>
             <div>
               <label className={LabelClass}>Category</label>
-              <select value={form.category} onChange={e => set("category", e.target.value)} className={InputClass}>
+              <select value={form.category} onChange={e => {
+                set("category", e.target.value);
+                set("subCategory", ""); // Reset subcategory when category changes
+              }} className={InputClass}>
                 <option value="">Select Category</option>
                 {categories.map(c => <option key={c._id || c.name} value={c.name}>{c.name}</option>)}
               </select>
             </div>
           </div>
+
+          {/* SubCategory if available */}
+          {categories.find(c => c.name === form.category)?.subCategories?.length > 0 && (
+            <div>
+              <label className={LabelClass}>Sub-Category</label>
+              <select value={form.subCategory} onChange={e => set("subCategory", e.target.value)} className={InputClass}>
+                <option value="">-- No Sub-category (Directly under Category) --</option>
+                {categories.find(c => c.name === form.category)?.subCategories.map((s: string) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Description */}
           <div>
@@ -386,7 +404,7 @@ export default function AdminTestsPage() {
 
                     {/* Meta chips */}
                     <div className="flex flex-wrap gap-2">
-                      <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded-lg border border-primary-500/20">{exam.category}</span>
+                      <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded-lg border border-primary-500/20">{exam.category} {exam.subCategory && `> ${exam.subCategory}`}</span>
                       <span className="text-xs bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-1 rounded-lg flex items-center gap-1"><Clock className="w-3 h-3" />{exam.durationMinutes}m</span>
                       <span className="text-xs bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-1 rounded-lg">{exam.questionCount ?? 0} Qs</span>
                       {exam.negativeMarking > 0 && <span className="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded-lg">-{exam.negativeMarking} neg</span>}

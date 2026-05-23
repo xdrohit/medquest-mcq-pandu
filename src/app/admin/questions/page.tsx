@@ -18,12 +18,15 @@ const difficultyColor: Record<string, string> = {
 };
 
 // ─── Question Form Modal ───────────────────────────────────────────────────────
-function QuestionModal({ exams, question, onClose, onSaved }: {
-  exams: any[], question?: any, onClose: () => void, onSaved: () => void
+function QuestionModal({ exams, categories, question, onClose, onSaved }: {
+  exams: any[], categories: any[], question?: any, onClose: () => void, onSaved: () => void
 }) {
   const isEdit = !!question;
+  const [targetType, setTargetType] = useState<"exam" | "bank">(question?.examId ? "exam" : "bank");
   const [form, setForm] = useState({
     examId: question?.examId?._id || question?.examId || "",
+    categoryId: question?.categoryId?._id || question?.categoryId || "",
+    subCategory: question?.subCategory || "",
     text: question?.text || "",
     options: question?.options || ["", "", "", ""],
     correctAnswer: question?.correctAnswer ?? 0,
@@ -44,15 +47,24 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.examId) { setError("Please select an exam."); return; }
+    if (targetType === "exam" && !form.examId) { setError("Please select an exam."); return; }
+    if (targetType === "bank" && !form.categoryId) { setError("Please select a category."); return; }
     if (form.options.some((o: string) => !o.trim())) { setError("All 4 options are required."); return; }
     setSaving(true); setError("");
     try {
+      const payload = { ...form };
+      if (targetType === "exam") {
+        payload.categoryId = "";
+        payload.subCategory = "";
+      } else {
+        payload.examId = "";
+      }
+      
       const url = isEdit ? `/api/admin/questions/${question._id}` : "/api/admin/questions";
       const method = isEdit ? "PUT" : "POST";
       const res = await fetch(url, {
         method, headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error((await res.json()).error);
       onSaved();
@@ -90,21 +102,59 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
             </div>
           )}
 
-          {/* Exam Selector */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Exam / Course</label>
-            <select
-              value={form.examId}
-              onChange={e => setForm(f => ({ ...f, examId: e.target.value }))}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
-              required
-            >
-              <option value="">-- Select Exam --</option>
-              {exams.map((ex: any) => (
-                <option key={ex._id} value={ex._id}>{ex.title} ({ex.category})</option>
-              ))}
-            </select>
+          {/* Target Type Toggle */}
+          <div className="flex gap-4 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+            <button type="button" onClick={() => setTargetType("exam")} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${targetType === "exam" ? "bg-white dark:bg-slate-700 shadow text-primary-500" : "text-slate-500"}`}>Assign to Exam</button>
+            <button type="button" onClick={() => setTargetType("bank")} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${targetType === "bank" ? "bg-white dark:bg-slate-700 shadow text-primary-500" : "text-slate-500"}`}>Global Question Bank</button>
           </div>
+
+          {/* Selector based on target type */}
+          {targetType === "exam" ? (
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Exam / Course</label>
+              <select
+                value={form.examId}
+                onChange={e => setForm(f => ({ ...f, examId: e.target.value }))}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
+                required={targetType === "exam"}
+              >
+                <option value="">-- Select Exam --</option>
+                {exams.map((ex: any) => (
+                  <option key={ex._id} value={ex._id}>{ex.title} ({ex.category})</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</label>
+                <select
+                  value={form.categoryId}
+                  onChange={e => setForm(f => ({ ...f, categoryId: e.target.value, subCategory: "" }))}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
+                  required={targetType === "bank"}
+                >
+                  <option value="">-- Select Category --</option>
+                  {categories.map((c: any) => (
+                    <option key={c._id} value={c._id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sub-category</label>
+                <select
+                  value={form.subCategory}
+                  onChange={e => setForm(f => ({ ...f, subCategory: e.target.value }))}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
+                >
+                  <option value="">-- No Sub-category --</option>
+                  {categories.find((c:any) => c._id === form.categoryId)?.subCategories?.map((s: string) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Question Text */}
           <div className="space-y-1.5">
@@ -224,8 +274,11 @@ function QuestionModal({ exams, question, onClose, onSaved }: {
 }
 
 // ─── Bulk Upload Modal ─────────────────────────────────────────────────────────
-function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: () => void, onSaved: () => void }) {
+function BulkUploadModal({ exams, categories, onClose, onSaved }: { exams: any[], categories: any[], onClose: () => void, onSaved: () => void }) {
+  const [targetType, setTargetType] = useState<"exam" | "bank">("exam");
   const [examId, setExamId] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [subCategory, setSubCategory] = useState("");
   const [csvText, setCsvText] = useState("");
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState("");
@@ -274,7 +327,8 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
   };
 
   const handleUpload = async () => {
-    if (!examId) { setError("Select an exam first."); return; }
+    if (targetType === "exam" && !examId) { setError("Select an exam first."); return; }
+    if (targetType === "bank" && !categoryId) { setError("Select a category first."); return; }
     let parsed;
     try { 
       parsed = parseCSV(csvText); 
@@ -284,7 +338,12 @@ function BulkUploadModal({ exams, onClose, onSaved }: { exams: any[], onClose: (
     }
     setUploading(true); setError(""); setResult("");
     try {
-      const questions = parsed.map((q: any) => ({ ...q, examId }));
+      const questions = parsed.map((q: any) => ({
+        ...q,
+        examId: targetType === "exam" ? examId : undefined,
+        categoryId: targetType === "bank" ? categoryId : undefined,
+        subCategory: targetType === "bank" ? subCategory : undefined,
+      }));
       const res = await fetch("/api/admin/questions/bulk", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questions }),
@@ -326,16 +385,47 @@ Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central in
             </div>
           )}
 
-          <div>
-            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Target Exam</label>
-            <select
-              value={examId} onChange={e => setExamId(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
-            >
-              <option value="">-- Select Exam --</option>
-              {exams.map((ex: any) => <option key={ex._id} value={ex._id}>{ex.title}</option>)}
-            </select>
+          {/* Target Selection */}
+          <div className="flex gap-4 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4">
+            <button type="button" onClick={() => setTargetType("exam")} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${targetType === "exam" ? "bg-white dark:bg-slate-700 shadow text-primary-500" : "text-slate-500"}`}>Assign to Exam</button>
+            <button type="button" onClick={() => setTargetType("bank")} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${targetType === "bank" ? "bg-white dark:bg-slate-700 shadow text-primary-500" : "text-slate-500"}`}>Global Question Bank</button>
           </div>
+
+          {targetType === "exam" ? (
+            <div>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Target Exam</label>
+              <select
+                value={examId} onChange={e => setExamId(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
+              >
+                <option value="">-- Select Exam --</option>
+                {exams.map((ex: any) => <option key={ex._id} value={ex._id}>{ex.title}</option>)}
+              </select>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Category</label>
+                <select
+                  value={categoryId} onChange={e => { setCategoryId(e.target.value); setSubCategory(""); }}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
+                >
+                  <option value="">-- Select Category --</option>
+                  {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Sub-category</label>
+                <select
+                  value={subCategory} onChange={e => setSubCategory(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-primary-500"
+                >
+                  <option value="">-- No Sub-category --</option>
+                  {categories.find((c:any) => c._id === categoryId)?.subCategories?.map((s: string) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">CSV Data</label>
@@ -368,6 +458,7 @@ Bachhon mein sabse pehle kaun sa primary tooth nikalta hai?,Maxillary central in
 export default function AdminQuestionsPage() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterExam, setFilterExam] = useState("");
@@ -386,18 +477,22 @@ export default function AdminQuestionsPage() {
     if (search) params.set("search", search);
     const timestamp = Date.now();
     try {
-      const [qRes, eRes] = await Promise.all([
+      const [qRes, eRes, cRes] = await Promise.all([
         fetch(`/api/admin/questions?${params}&t=${timestamp}`, { cache: "no-store" }),
         fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }),
+        fetch(`/api/categories?all=true&t=${timestamp}`, { cache: "no-store" }),
       ]);
       const qData = await qRes.json();
       const eData = await eRes.json();
+      const cData = await cRes.json();
       setQuestions(Array.isArray(qData) ? qData : []);
       setExams(Array.isArray(eData) ? eData : []);
+      setCategories(Array.isArray(cData) ? cData : []);
     } catch (error) {
       console.error("Fetch error:", error);
       setQuestions([]);
       setExams([]);
+      setCategories([]);
     }
     setLoading(false);
   }, [filterExam, filterDiff, search]);
@@ -430,13 +525,14 @@ export default function AdminQuestionsPage() {
         {(modalMode === "add" || modalMode === "edit") && (
           <QuestionModal
             exams={exams}
+            categories={categories}
             question={modalMode === "edit" ? editQuestion : undefined}
             onClose={() => { setModalMode(null); setEditQuestion(null); }}
             onSaved={() => { setModalMode(null); setEditQuestion(null); fetchAll(); }}
           />
         )}
         {bulkModal && (
-          <BulkUploadModal exams={exams} onClose={() => setBulkModal(false)} onSaved={() => { setBulkModal(false); fetchAll(); }} />
+          <BulkUploadModal exams={exams} categories={categories} onClose={() => setBulkModal(false)} onSaved={() => { setBulkModal(false); fetchAll(); }} />
         )}
       </AnimatePresence>
 
@@ -498,7 +594,7 @@ export default function AdminQuestionsPage() {
                     <input type="checkbox" checked={selected.length === questions.length && questions.length > 0} onChange={toggleAll} className="accent-primary-500 w-4 h-4 cursor-pointer" />
                   </th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Question</th>
-                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Exam</th>
+                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Location (Exam / Bank)</th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Topic</th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Difficulty</th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
@@ -533,9 +629,17 @@ export default function AdminQuestionsPage() {
                       {q.randomize && <span className="text-xs text-purple-400 mt-1 flex items-center gap-1"><Shuffle className="w-3 h-3" /> Randomized</span>}
                     </td>
                     <td className="p-4">
-                      <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded-lg border border-primary-500/30">
-                        {q.examId?.title || "—"}
-                      </span>
+                      {q.examId ? (
+                        <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded-lg border border-primary-500/30 font-semibold flex items-center w-max gap-1">
+                          <BookOpen className="w-3 h-3" /> {q.examId?.title || "Exam"}
+                        </span>
+                      ) : q.categoryId ? (
+                        <span className="text-xs bg-accent-500/20 text-accent-400 px-2 py-1 rounded-lg border border-accent-500/30 font-semibold flex items-center w-max gap-1">
+                          <BookOpen className="w-3 h-3" /> Bank: {q.categoryId?.name} {q.subCategory && `> ${q.subCategory}`}
+                        </span>
+                      ) : (
+                        <span className="text-xs bg-slate-500/20 text-slate-400 px-2 py-1 rounded-lg border border-slate-500/30">Unknown</span>
+                      )}
                     </td>
                     <td className="p-4">
                       {q.topic ? (

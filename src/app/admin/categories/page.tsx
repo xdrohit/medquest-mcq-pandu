@@ -30,6 +30,7 @@ const emptyForm = {
   icon: "Brain",
   color: "bg-primary-50 border-primary-200 border-2",
   active: true,
+  subCategories: "",
 };
 
 // ─── Category Form Modal ───────────────────────────────────────────────────────
@@ -43,6 +44,7 @@ function CategoryModal({ category, onClose, onSaved }: { category?: any; onClose
       icon: category.icon || "Brain",
       color: category.color || "bg-primary-50 border-primary-200 border-2",
       active: category.active ?? true,
+      subCategories: Array.isArray(category.subCategories) ? category.subCategories.join(", ") : "",
     };
   });
   const [saving, setSaving] = useState(false);
@@ -55,7 +57,10 @@ function CategoryModal({ category, onClose, onSaved }: { category?: any; onClose
     if (!form.name.trim()) { setError("Category Name is required."); return; }
     setSaving(true); setError("");
     try {
-      const payload: any = { ...form };
+      const payload: any = { 
+        ...form,
+        subCategories: form.subCategories.split(",").map((s: string) => s.trim()).filter(Boolean)
+      };
       if (isEdit) payload.id = category._id;
 
       const res = await fetch("/api/categories", {
@@ -110,6 +115,12 @@ function CategoryModal({ category, onClose, onSaved }: { category?: any; onClose
           <div>
             <label className={LabelClass}>Subtitle / Subtext (shown on Card)</label>
             <input type="text" value={form.description} onChange={e => set("description", e.target.value)} className={InputClass} placeholder="e.g. 500+ Questions" />
+          </div>
+
+          {/* SubCategories */}
+          <div>
+            <label className={LabelClass}>Sub-categories (comma separated)</label>
+            <input type="text" value={form.subCategories} onChange={e => set("subCategories", e.target.value)} className={InputClass} placeholder="e.g. 1st Year, 2nd Year, Physiology" />
           </div>
 
           {/* Icon Selector */}
@@ -293,6 +304,7 @@ export default function AdminCategoriesPage() {
                 <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Preview</th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Name</th>
+                  <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sub-categories</th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description Subtitle</th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
                   <th className="p-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
@@ -302,12 +314,12 @@ export default function AdminCategoriesPage() {
                 {loading ? (
                   [...Array(3)].map((_, i) => (
                     <tr key={i} className="border-b border-slate-200 dark:border-slate-800/50">
-                      <td colSpan={5} className="p-4"><div className="h-5 bg-slate-50 dark:bg-slate-800 rounded animate-pulse" /></td>
+                      <td colSpan={6} className="p-4"><div className="h-5 bg-slate-50 dark:bg-slate-800 rounded animate-pulse" /></td>
                     </tr>
                   ))
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-16 text-center text-slate-500">
+                    <td colSpan={6} className="p-16 text-center text-slate-500">
                       <Tag className="w-12 h-12 mx-auto mb-3 opacity-30" />
                       No categories found. Create your first category!
                     </td>
@@ -321,6 +333,14 @@ export default function AdminCategoriesPage() {
                         </div>
                       </td>
                       <td className="p-4 font-bold text-slate-900 dark:text-white text-sm">{cat.name}</td>
+                      <td className="p-4 text-slate-500 text-sm font-medium">
+                        {cat.subCategories?.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {cat.subCategories.slice(0, 2).map((s: string) => <span key={s} className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs">{s}</span>)}
+                            {cat.subCategories.length > 2 && <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs">+{cat.subCategories.length - 2}</span>}
+                          </div>
+                        ) : <span className="text-slate-400">—</span>}
+                      </td>
                       <td className="p-4 text-slate-500 text-sm font-medium">{cat.description}</td>
                       <td className="p-4">
                         <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${

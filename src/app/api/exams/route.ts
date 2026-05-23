@@ -11,8 +11,9 @@ export async function GET(req: Request) {
     await dbConnect();
     const { searchParams } = new URL(req.url);
     const all = searchParams.get('all');
+    const id = searchParams.get('id');
     // Students see exams that are published OR active (active: true is the main gate)
-    const query = all === 'true' ? {} : { active: true };
+    const query: any = id ? { _id: id } : (all === 'true' ? {} : { active: true });
     const exams = await Exam.find(query).sort({ createdAt: -1 });
 
     const examsWithCount = await Promise.all(

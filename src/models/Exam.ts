@@ -4,6 +4,7 @@ const ExamSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
   category: { type: String, required: true },
+  subCategory: { type: String },
   durationMinutes: { type: Number, required: true },
   active: { type: Boolean, default: false },
   status: { type: String, enum: ['draft', 'published', 'scheduled'], default: 'draft' },

@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     if (difficulty) query.difficulty = difficulty;
     if (search) query.text = { $regex: search, $options: 'i' };
 
-    const questions = await Question.find(query).populate('examId', 'title category').sort({ createdAt: -1 });
+    const questions = await Question.find(query).populate('examId', 'title category').populate('categoryId', 'name').sort({ createdAt: -1 });
     return NextResponse.json(questions, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
