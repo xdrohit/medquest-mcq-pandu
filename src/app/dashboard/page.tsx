@@ -14,7 +14,6 @@ import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState<"available" | "analytics">("available");
-  const [exams, setExams] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
@@ -49,10 +48,9 @@ export default function StudentDashboard() {
     // ── STEP 2 & 3: Stats + Exams in parallel (DB calls) ─────────────────
     Promise.all([
       fetch(`/api/user/profile?t=${ts}`, { cache: "no-store" }),
-      fetch(`/api/exams?t=${ts}`, { cache: "no-store" }),
       fetch(`/api/categories?t=${ts}`, { cache: "no-store" }),
     ])
-      .then(async ([profileRes, examsRes, categoriesRes]) => {
+      .then(async ([profileRes, categoriesRes]) => {
         if (profileRes.ok) {
           const pd = await profileRes.json();
           setStats(pd?.stats ?? {});
@@ -60,10 +58,6 @@ export default function StudentDashboard() {
           if (pd?.user?.name) setAuthUser(prev => ({ ...prev!, name: pd.user.name }));
         } else {
           setStats({});
-        }
-        if (examsRes.ok) {
-          const ed = await examsRes.json();
-          setExams(Array.isArray(ed) ? ed : []);
         }
         if (categoriesRes?.ok) {
           const cd = await categoriesRes.json();
@@ -161,15 +155,15 @@ export default function StudentDashboard() {
                   <Button variant="primary" disabled className="rounded-xl px-6 py-3 font-bold opacity-70 cursor-wait">
                     Loading... <span className="ml-2 w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
                   </Button>
-                ) : exams.length > 0 ? (
-                  <Link href={`/exam/${exams[0]._id}`}>
-                    <Button variant="primary" className="shadow-lg shadow-primary-500/20 rounded-xl px-6 py-3 font-bold">
-                      Resume Training <Play className="w-4 h-4 ml-2 fill-current" />
-                    </Button>
-                  </Link>
                 ) : (
-                  <Button variant="primary" disabled className="rounded-xl px-6 py-3 font-bold">
-                    No active tests <Play className="w-4 h-4 ml-2" />
+                  <Button onClick={() => {
+                    const c = categories.length > 0 ? categories[Math.floor(Math.random() * categories.length)] : null;
+                    if(c) {
+                      setSelectedCategory(c);
+                      updateUrl(c._id, null);
+                    }
+                  }} variant="primary" className="shadow-lg shadow-primary-500/20 rounded-xl px-6 py-3 font-bold">
+                    Start Random Practice <Play className="w-4 h-4 ml-2 fill-current" />
                   </Button>
                 )}
               </div>
@@ -240,7 +234,6 @@ export default function StudentDashboard() {
             ) : (
               categories.map((cat, idx) => {
                 // Use the accurate mcqCount from the API
-                const catExams = exams.filter(e => e.category === cat.name);
                 const mcqCount = cat.mcqCount || 0;
                 
                 return (
@@ -254,9 +247,6 @@ export default function StudentDashboard() {
                       <div className={`w-14 h-14 rounded-2xl ${cat.color || 'bg-primary-50 border-primary-200 border-2'} flex items-center justify-center transition-transform group-hover:scale-110`}>
                         <CategoryIcon name={cat.icon || 'BookOpen'} className={`w-7 h-7 ${cat.color ? '' : 'text-primary-500'}`} />
                       </div>
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
-                        {catExams.length} Tests
-                      </span>
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{cat.name}</h3>
                     <p className="text-slate-500 text-sm mb-8 flex-grow">
@@ -320,65 +310,39 @@ export default function StudentDashboard() {
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{sub}</h3>
                   </motion.div>
                 ))}
-                {/* View All Option */}
                 <motion.div
                   onClick={() => { setSelectedSubCategory("All"); updateUrl(selectedCategory._id, "All"); }}
                   className="group rounded-3xl bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col justify-center items-center h-40 shadow-sm dark:shadow-none cursor-pointer text-center"
                 >
                   <ChevronRight className="w-8 h-8 text-primary-500 mb-3 group-hover:translate-x-2 transition-transform" />
-                  <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 leading-tight">View All Tests</h3>
+                  <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 leading-tight">View All MCQs</h3>
                 </motion.div>
               </div>
             ) : (
               <div>
-                <div className="flex justify-end mb-6">
+                <div className="flex flex-col items-center justify-center py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="w-20 h-20 bg-primary-500/10 dark:bg-primary-500/20 rounded-full flex items-center justify-center mb-6">
+                    <Target className="w-10 h-10 text-primary-500" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Ready to start practicing?</h3>
+                  <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8">
+                    Generate a dynamic set of 20 MCQs from 
+                    <span className="font-bold text-primary-600 dark:text-primary-400 mx-1">{selectedSubCategory && selectedSubCategory !== "All" ? selectedSubCategory : selectedCategory.name}</span>
+                    and test your knowledge instantly.
+                  </p>
+                  
                   <Button 
                     onClick={handleQuickPractice} 
                     disabled={generatingMock}
-                    className="bg-accent-500 hover:bg-accent-600 text-white rounded-xl py-2 px-6 font-bold flex items-center gap-2 shadow-lg shadow-accent-500/20"
+                    className="bg-accent-500 hover:bg-accent-600 text-white rounded-xl py-4 px-10 text-lg font-bold flex items-center gap-3 shadow-xl shadow-accent-500/20 hover:scale-105 transition-all"
                   >
                     {generatingMock ? (
-                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating...</>
+                      <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating Session...</>
                     ) : (
-                      <><Zap className="w-5 h-5" /> Quick Practice (20 MCQs)</>
+                      <><Zap className="w-6 h-6" /> Start Practice Session (20 MCQs)</>
                     )}
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {exams.filter(e => e.category === selectedCategory.name && (!selectedSubCategory || selectedSubCategory === "All" || e.subCategory === selectedSubCategory)).length === 0 ? (
-                    <div className="col-span-full py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-                      <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-                      <h3 className="text-lg font-bold text-slate-500 dark:text-slate-400">No official tests available in this category.</h3>
-                      <p className="text-slate-500 mt-2">Use the Quick Practice button above to generate a mock test from the Question Bank!</p>
-                    </div>
-                  ) : (
-                    exams.filter(e => e.category === selectedCategory.name && (!selectedSubCategory || selectedSubCategory === "All" || e.subCategory === selectedSubCategory)).map((exam, idx) => (
-                  <motion.div
-                    key={exam._id}
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                    className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 hover:border-primary-500/50 transition-all hover:shadow-2xl hover:shadow-primary-500/10 flex flex-col h-full shadow-sm dark:shadow-none"
-                  >
-                    <div className="flex justify-between items-start mb-6">
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
-                        <BookOpen className="w-3.5 h-3.5" /> {exam.questionCount || 0} MCQs
-                      </span>
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
-                        <Clock className="w-3.5 h-3.5" /> {exam.durationMinutes}m
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{exam.title}</h3>
-                    <p className="text-slate-500 text-sm mb-8 flex-grow line-clamp-2">
-                      {exam.description || `Comprehensive mock exam covering key concepts for your medical preparation.`}
-                    </p>
-                    <Link href={`/exam/${exam._id}`}>
-                      <Button className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 dark:hover:bg-primary-600 text-slate-900 dark:text-white hover:text-white rounded-xl py-3 transition-colors border border-slate-200 dark:border-slate-700 hover:border-primary-500 group-hover:bg-primary-600 group-hover:text-white font-bold">
-                        Start Mission <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
-                    </Link>
-                  </motion.div>
-                ))
-              )}
-            </div>
               </div>
             )}
           </motion.div>
@@ -406,7 +370,7 @@ export default function StudentDashboard() {
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-transparent opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-500" />
                 <div className="flex items-center gap-3 mb-4 relative z-10">
                   <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"><CheckCircle2 className="w-5 h-5" /></div>
-                  <h3 className="font-bold text-slate-700 dark:text-slate-300">Tests Completed</h3>
+                  <h3 className="font-bold text-slate-700 dark:text-slate-300">Sessions Completed</h3>
                 </div>
                 <div className="text-4xl font-black text-slate-900 dark:text-white relative z-10">
                   {statsLoading ? <span className="inline-block w-12 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" /> : totalExams}
@@ -516,7 +480,7 @@ export default function StudentDashboard() {
                       <Link key={result._id} href={`/dashboard/results/${result._id}`}>
                         <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 hover:border-primary-200 dark:hover:border-primary-500/30 transition-all cursor-pointer group">
                           <div>
-                            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{result.examId?.title || 'Unknown Exam'}</h4>
+                            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Practice Session</h4>
                             <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider font-bold">{new Date(result.submittedAt).toLocaleDateString()}</p>
                           </div>
                           <div className="text-right">

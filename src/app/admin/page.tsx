@@ -13,29 +13,26 @@ import {
 
 
 export default function AdminDashboard() {
-  const [exams, setExams] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalExams: 0, totalQuestions: 0, totalStudents: 0, totalTestsTaken: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timestamp = Date.now();
-    Promise.all([
-      fetch(`/api/exams?all=true&t=${timestamp}`, { cache: "no-store" }).then(r => r.json()),
-      fetch(`/api/admin/stats?t=${timestamp}`, { cache: "no-store" }).then(r => r.json()),
-    ]).then(([examsData, statsData]) => {
-      const examList = Array.isArray(examsData) ? examsData : [];
-      setExams(examList);
-      setStats({ 
-        totalExams: statsData.totalExams || 0, 
-        totalQuestions: statsData.totalQuestions || 0,
-        totalStudents: statsData.totalStudents || 0,
-        totalTestsTaken: statsData.totalTestsTaken || 0
+    fetch(`/api/admin/stats?t=${timestamp}`, { cache: "no-store" })
+      .then(r => r.json())
+      .then(statsData => {
+        setStats({ 
+          totalExams: statsData.totalExams || 0, 
+          totalQuestions: statsData.totalQuestions || 0,
+          totalStudents: statsData.totalStudents || 0,
+          totalTestsTaken: statsData.totalTestsTaken || 0
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
       });
-      setLoading(false);
-    }).catch((err) => {
-      console.error(err);
-      setLoading(false);
-    });
   }, []);
 
   const handleLogout = async () => {
@@ -44,15 +41,13 @@ export default function AdminDashboard() {
   };
 
   const statCards = [
-    { label: "Total Exams", value: loading ? "—" : stats.totalExams, sub: "Ready for your students 🎀", icon: ClipboardList, color: "text-pink-600 dark:text-pink-400", ring: "ring-pink-300 dark:ring-pink-500/30", bg: "from-pink-100 dark:from-pink-500/20 to-transparent", quote: "Icchu's empire is growing! 🐼" },
     { label: "Total MCQs", value: loading ? "—" : stats.totalQuestions, sub: "Cuteness overloaded in Question Bank 🌸", icon: BookOpen, color: "text-rose-600 dark:text-rose-400", ring: "ring-rose-300 dark:ring-rose-500/30", bg: "from-rose-100 dark:from-rose-500/20 to-transparent", quote: "Even Pandas need a break, but you are unstoppable! 💕" },
     { label: "Active Students", value: loading ? "—" : stats.totalStudents, sub: "Registered users", icon: Users, color: "text-fuchsia-600 dark:text-fuchsia-400", ring: "ring-fuchsia-300 dark:ring-fuchsia-500/30", bg: "from-fuchsia-100 dark:from-fuchsia-500/20 to-transparent", quote: "Everyone loves your platform! 🥰" },
-    { label: "Tests Taken", value: loading ? "—" : stats.totalTestsTaken, sub: "All time submissions", icon: TrendingUp, color: "text-pink-600 dark:text-pink-400", ring: "ring-pink-300 dark:ring-pink-500/30", bg: "from-pink-100 dark:from-pink-500/20 to-transparent", quote: "Keep spreading the knowledge! ✨" },
+    { label: "Practice Sessions", value: loading ? "—" : stats.totalTestsTaken, sub: "All time practices", icon: TrendingUp, color: "text-pink-600 dark:text-pink-400", ring: "ring-pink-300 dark:ring-pink-500/30", bg: "from-pink-100 dark:from-pink-500/20 to-transparent", quote: "Keep spreading the knowledge! ✨" },
   ];
 
   const quickActions = [
     { href: "/admin/questions", label: "Add MCQ", icon: Plus, desc: "Add a cute question", color: "bg-pink-500 hover:bg-pink-400" },
-    { href: "/admin/tests", label: "Create Exam", icon: ClipboardList, desc: "Set up a new test", color: "bg-rose-500 hover:bg-rose-400" },
     { href: "/admin/students", label: "Manage Users", icon: Users, desc: "View all students", color: "bg-fuchsia-500 hover:bg-fuchsia-400" },
     { href: "/api/seed", label: "Seed Database", icon: Database, desc: "Reset sample data", color: "bg-pink-700 hover:bg-pink-600" },
   ];
@@ -81,11 +76,6 @@ export default function AdminDashboard() {
             </motion.p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/admin/tests">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-pink-900/30 border border-pink-200 dark:border-pink-800 text-pink-600 dark:text-pink-300 hover:bg-pink-50 dark:hover:bg-pink-900/50 text-sm font-bold transition-colors shadow-sm">
-                <ClipboardList className="w-4 h-4" /> New Exam
-              </button>
-            </Link>
             <Link href="/admin/questions">
               <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-500 hover:bg-pink-400 text-white text-sm font-bold transition-colors shadow-lg shadow-pink-500/30">
                 <Plus className="w-4 h-4" /> Add MCQ
@@ -140,75 +130,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Exams Table */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🎀</span>
-              <h2 className="text-sm font-bold text-pink-700 dark:text-pink-300 uppercase tracking-wider">Your Official Tests</h2>
-            </div>
-            <Link href="/admin/tests" className="text-xs text-pink-500 dark:text-pink-400 hover:text-pink-600 dark:hover:text-pink-300 font-bold flex items-center gap-1 transition-colors">
-              View All <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-
-          <div className="bg-white dark:bg-pink-900/10 border-2 border-pink-100 dark:border-pink-800/50 rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
-            {loading ? (
-              <div className="p-8 space-y-3">
-                {[...Array(4)].map((_, i) => <div key={i} className="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse" />)}
-              </div>
-            ) : exams.length === 0 ? (
-              <div className="p-16 text-center">
-                <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-                <p className="text-slate-600 dark:text-slate-400 font-medium">No exams yet</p>
-                <p className="text-slate-500 dark:text-slate-600 text-sm mt-1">Create your first exam to get started</p>
-                <Link href="/admin/tests">
-                  <button className="mt-4 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-bold hover:bg-primary-500 transition-colors">Create Exam</button>
-                </Link>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-transparent">
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Exam</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Questions</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {exams.slice(0, 6).map((exam: any, i: number) => (
-                      <motion.tr key={exam._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }} className="border-b border-slate-100 dark:border-slate-800/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                        <td className="px-6 py-4">
-                          <p className="font-semibold text-slate-900 dark:text-white text-sm whitespace-nowrap">{exam.title}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{exam.durationMinutes}m duration</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-xs bg-pink-50 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400 px-2.5 py-1 rounded-lg border border-pink-100 dark:border-pink-500/20 font-bold whitespace-nowrap">{exam.category}</span>
-                        </td>
-                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300 text-sm font-bold">{exam.questionCount ?? 0}</td>
-                        <td className="px-6 py-4">
-                          <span className={`text-xs px-2.5 py-1 rounded-full font-bold border whitespace-nowrap ${
-                            exam.status === "published" ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20"
-                            : exam.status === "scheduled" ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/20"
-                            : "bg-pink-50 text-pink-600 border-pink-200 dark:bg-pink-900 dark:text-pink-400 dark:border-pink-600"
-                          }`}>
-                            {exam.status === "published" ? "● Published" : exam.status === "scheduled" ? "◷ Scheduled" : "○ Draft 🐼"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Link href="/admin/questions" className="text-xs text-pink-500 dark:text-pink-400 hover:text-pink-600 dark:hover:text-pink-300 font-bold transition-colors whitespace-nowrap">Manage MCQs →</Link>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Removed Exams Table */}
     </div>
   );
 }

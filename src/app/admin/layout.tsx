@@ -13,7 +13,6 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/categories", label: "Category Manager", icon: Tag },
   { href: "/admin/questions", label: "MCQ Manager", icon: BookOpen },
-  { href: "/admin/tests", label: "Test Management", icon: ClipboardList },
   { href: "/admin/students", label: "Students", icon: Users },
   { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/dashboard", label: "Student View", icon: Activity },
