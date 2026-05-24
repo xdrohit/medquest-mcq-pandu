@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, ClipboardList, Users, CreditCard,
-  LogOut, Activity, ShieldCheck, Menu, X, Tag, Heart
+  LogOut, Activity, ShieldCheck, Menu, X, Tag, Heart, Palette
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/categories", label: "Category Manager", icon: Tag },
   { href: "/admin/questions", label: "MCQ Manager", icon: BookOpen },
+  { href: "/admin/cms", label: "CMS Editor 🎛️", icon: Palette },
   { href: "/admin/students", label: "Students", icon: Users },
   { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/dashboard", label: "Student View", icon: Activity },
