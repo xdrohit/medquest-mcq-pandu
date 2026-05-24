@@ -83,6 +83,14 @@ export const DEFAULT_CONTENT: Record<string, any> = {
     accentColor: "#a855f7",
     favicon: "",
   },
+  popup: {
+    enabled: false,
+    title: "🎉 New Practice Series!",
+    text: "We have added new topics for practice. Level up your preparation now.",
+    btnText: "Start Practice Now",
+    btnLink: "/dashboard",
+    dismissible: true,
+  },
   blog: [
     {
       id: "1",

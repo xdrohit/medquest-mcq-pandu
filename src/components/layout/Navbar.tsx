@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, LogIn, LogOut, ChevronDown, User, LayoutDashboard, ShieldCheck, Menu, X } from "lucide-react";
+import { Activity, LogIn, LogOut, ChevronDown, User, LayoutDashboard, ShieldCheck, Menu, X, Bell, ExternalLink } from "lucide-react";
 import { Button } from "../ui/Button";
 
 interface AuthUser {
@@ -20,6 +20,13 @@ export const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const [brand, setBrand] = useState<any>({
+    logoText: "Daily Dose MCQ",
+    logoEmoji: "🩺",
+  });
+  const [popup, setPopup] = useState<any>(null);
+  const [showPopup, setShowPopup] = useState(false);
+
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => r.json())
@@ -28,6 +35,27 @@ export const Navbar = () => {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    // Fetch CMS settings/brand
+    fetch("/api/site-content?t=" + Date.now())
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.brand) setBrand(data.brand);
+        if (data?.popup) {
+          setPopup(data.popup);
+          if (data.popup.enabled) {
+            try {
+              const dismissKey = `dismiss_pop_${btoa(unescape(encodeURIComponent(data.popup.title))).slice(0, 16)}`;
+              if (!localStorage.getItem(dismissKey)) {
+                setShowPopup(true);
+              }
+            } catch {
+              setShowPopup(true);
+            }
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = async () => {
@@ -35,8 +63,19 @@ export const Navbar = () => {
     window.location.href = "/";
   };
 
+  const dismissPopup = () => {
+    setShowPopup(false);
+    if (popup?.title) {
+      try {
+        const dismissKey = `dismiss_pop_${btoa(unescape(encodeURIComponent(popup.title))).slice(0, 16)}`;
+        localStorage.setItem(dismissKey, "true");
+      } catch {}
+    }
+  };
+
   return (
-    <motion.header
+    <>
+      <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className="fixed top-0 left-0 right-0 z-50 px-4 py-4"
@@ -45,11 +84,11 @@ export const Navbar = () => {
         <div className="glass rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between shadow-[0_8px_32px_rgba(37,99,235,0.1)] relative z-50">
           
           <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 text-white shadow-[0_0_15px_rgba(14,165,233,0.5)] group-hover:shadow-[0_0_25px_rgba(14,165,233,0.8)] transition-shadow">
-              <Activity className="w-6 h-6" />
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-400 text-white shadow-[0_0_15px_rgba(14,165,233,0.5)] group-hover:shadow-[0_0_25px_rgba(14,165,233,0.8)] transition-shadow text-xl font-bold">
+              {brand.logoEmoji || "🩺"}
             </div>
             <span className="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">
-              Daily Dose <span className="text-primary-600 dark:text-primary-400">MCQ</span>
+              {brand.logoText || "Daily Dose MCQ"}
             </span>
           </Link>
 
@@ -204,5 +243,61 @@ export const Navbar = () => {
         </AnimatePresence>
       </div>
     </motion.header>
-  );
+
+    {/* Dynamic Pop-up Alert Modal */}
+    <AnimatePresence>
+      {showPopup && popup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative overflow-hidden text-center"
+          >
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-500 to-accent-500" />
+            
+            {popup.dismissible && (
+              <button
+                onClick={dismissPopup}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+
+            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary-500 text-3xl">
+              {brand.logoEmoji || "🩺"}
+            </div>
+
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3">
+              {popup.title}
+            </h3>
+            
+            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
+              {popup.text}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {popup.btnText && (
+                <Link href={popup.btnLink || "/dashboard"} className="w-full" onClick={dismissPopup}>
+                  <Button variant="primary" className="w-full py-3.5 font-bold shadow-lg shadow-primary-500/20">
+                    {popup.btnText}
+                  </Button>
+                </Link>
+              )}
+              {popup.dismissible && (
+                <button
+                  onClick={dismissPopup}
+                  className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-2xl transition-colors text-sm"
+                >
+                  Later
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  </>
+);
 };

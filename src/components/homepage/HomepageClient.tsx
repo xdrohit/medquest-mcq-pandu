@@ -438,7 +438,7 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
           <motion.div
             {...fadeUp()}
             className="max-w-4xl mx-auto rounded-3xl overflow-hidden relative text-center"
-            style={{ background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a21caf 100%)" }}
+            style={{ background: "linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-500) 50%, var(--color-accent-500) 100%)" }}
           >
             <div className="absolute inset-0 bg-[url('/medical-bg.png')] bg-cover opacity-10" />
             <div className="relative px-8 py-16">
@@ -446,8 +446,8 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-5 leading-tight">Your Exam is Waiting.<br />Are You Ready?</h2>
               <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">Every topper had a strategy. Yours starts here. Sign up now and take your first test in under 2 minutes.</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/register"><button className="px-8 py-4 bg-white text-indigo-700 font-extrabold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-base">Create Free Account →</button></Link>
-                <Link href="/login"><button className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 transition-all text-base">Sign In Instead</button></Link>
+                <Link href="/register"><button className="px-8 py-4 bg-white text-primary-700 font-extrabold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-base cursor-pointer">Create Free Account →</button></Link>
+                <Link href="/login"><button className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 transition-all text-base cursor-pointer">Sign In Instead</button></Link>
               </div>
               <p className="text-white/50 text-sm mt-6">No credit card • Takes 30 seconds • 5,000+ students already inside</p>
             </div>

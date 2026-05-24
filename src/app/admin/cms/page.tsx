@@ -7,11 +7,12 @@ import {
   Megaphone, LayoutTemplate, BarChart3, Star, Sparkles, Info,
   Settings, HelpCircle, Globe, ChevronDown, ChevronUp, Eye, EyeOff,
   Monitor, Newspaper, LayoutGrid, Palette as Palette2, CalendarDays,
-  Type, Image as ImageIcon, ToggleLeft, ToggleRight
+  Type, Image as ImageIcon, ToggleLeft, ToggleRight, Bell
 } from "lucide-react";
 
 const TABS = [
   { key: "announcement", label: "📢 Announcement", icon: Megaphone },
+  { key: "popup",        label: "🔔 Site-wide Popup", icon: Bell },
   { key: "hero",         label: "🏠 Hero Section",  icon: LayoutTemplate },
   { key: "stats",        label: "📊 Stats Bar",     icon: BarChart3 },
   { key: "features",     label: "✨ Features Grid", icon: Sparkles },
@@ -158,6 +159,7 @@ export default function CMSPage() {
               className="p-6"
             >
               {activeTab === "announcement" && <AnnouncementEditor data={content.announcement} onChange={d => updateSection("announcement", d)} />}
+              {activeTab === "popup" && <PopupEditor data={content.popup} onChange={d => updateSection("popup", d)} />}
               {activeTab === "hero" && <HeroEditor data={content.hero} onChange={d => updateSection("hero", d)} />}
               {activeTab === "stats" && <StatsEditor data={content.stats} onChange={d => updateSection("stats", d)} />}
               {activeTab === "features" && <FeaturesEditor data={content.features} onChange={d => updateSection("features", d)} />}
@@ -615,6 +617,31 @@ function BrandEditor({ data, onChange }: { data: any; onChange: (d: any) => void
         >
           Sample Button →
         </button>
+      </div>
+    </div>
+  );
+}
+
+function PopupEditor({ data, onChange }: { data: any; onChange: (d: any) => void }) {
+  const d = data ?? {};
+  const set = (k: string, v: any) => onChange({ ...d, [k]: v });
+  return (
+    <div>
+      <SectionTitle>🔔 Site-wide Popup Alert</SectionTitle>
+      <p className="text-sm text-slate-500 mb-6 font-medium">Display a gorgeous overlay modal pop-up to students when they land on the website. Perfect for announcing major updates or new practice series!</p>
+      <div className="grid gap-4">
+        <Toggle label="Popup Active" checked={d.enabled ?? false} onChange={v => set("enabled", v)} />
+        <Field label="Popup Title">
+          <Input value={d.title} onChange={(v: string) => set("title", v)} placeholder="🎉 New Practice Series!" />
+        </Field>
+        <Field label="Popup Body Message">
+          <Input multiline value={d.text} onChange={(v: string) => set("text", v)} placeholder="We have added new topics for practice. Level up your preparation now." />
+        </Field>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="Button Text"><Input value={d.btnText} onChange={(v: string) => set("btnText", v)} placeholder="Start Practice Now" /></Field>
+          <Field label="Button Link"><Input value={d.btnLink} onChange={(v: string) => set("btnLink", v)} placeholder="/dashboard" /></Field>
+        </div>
+        <Toggle label="Allow Dismiss" checked={d.dismissible ?? true} onChange={v => set("dismissible", v)} />
       </div>
     </div>
   );
