@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Brain, Stethoscope, Pill, Activity, ArrowRight, ShieldCheck, Zap,
+  Brain, Activity, ArrowRight, ShieldCheck, Zap,
   Trophy, Clock, Target, BarChart3, Users, BookOpen, CheckCircle, Star,
   TrendingUp, Flame, LogIn, X, Info, CheckCircle2, AlertTriangle,
-  Heart, BrainCircuit, HeartPulse
+  Heart, BrainCircuit, HeartPulse, Newspaper, Tag, CalendarDays
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
@@ -27,13 +27,16 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.6, delay },
 });
 
-// Announcement Banner Component
+// ── Announcement Banner ────────────────────────────────────────────────────
 function AnnouncementBanner({ announcement }: { announcement: any }) {
   const [dismissed, setDismissed] = useState(false);
+
   useEffect(() => {
     if (announcement?.text) {
-      const key = `dismiss_${btoa(announcement.text).slice(0, 16)}`;
-      if (sessionStorage.getItem(key)) setDismissed(true);
+      try {
+        const key = `dismiss_${btoa(unescape(encodeURIComponent(announcement.text))).slice(0, 16)}`;
+        if (sessionStorage.getItem(key)) setDismissed(true);
+      } catch {}
     }
   }, [announcement?.text]);
 
@@ -41,16 +44,16 @@ function AnnouncementBanner({ announcement }: { announcement: any }) {
 
   const dismiss = () => {
     setDismissed(true);
-    if (announcement?.text) {
-      const key = `dismiss_${btoa(announcement.text).slice(0, 16)}`;
+    try {
+      const key = `dismiss_${btoa(unescape(encodeURIComponent(announcement.text))).slice(0, 16)}`;
       sessionStorage.setItem(key, "1");
-    }
+    } catch {}
   };
 
-  const colors: Record<string, string> = {
-    info: "bg-blue-50 border-blue-200 text-blue-800",
-    success: "bg-emerald-50 border-emerald-200 text-emerald-800",
-    warning: "bg-amber-50 border-amber-200 text-amber-800",
+  const colorMap: Record<string, string> = {
+    info:    "bg-blue-600 text-white",
+    success: "bg-emerald-600 text-white",
+    warning: "bg-amber-500 text-white",
   };
   const icons: Record<string, React.ElementType> = { info: Info, success: CheckCircle2, warning: AlertTriangle };
   const BannerIcon = icons[announcement.type ?? "info"] ?? Info;
@@ -58,14 +61,15 @@ function AnnouncementBanner({ announcement }: { announcement: any }) {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-        className={`w-full border-b ${colors[announcement.type ?? "info"]} px-4 py-2.5 flex items-center justify-center gap-3 text-sm font-semibold relative`}
-        style={{ marginTop: "64px" }} // below navbar
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        className={`w-full ${colorMap[announcement.type ?? "info"]} px-4 py-2.5 flex items-center justify-center gap-3 text-sm font-semibold relative z-30`}
       >
         <BannerIcon className="w-4 h-4 flex-shrink-0" />
         <span dangerouslySetInnerHTML={{ __html: announcement.text ?? "" }} />
         {announcement.dismissible && (
-          <button onClick={dismiss} className="absolute right-4 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100">
+          <button onClick={dismiss} className="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100">
             <X className="w-4 h-4" />
           </button>
         )}
@@ -74,11 +78,48 @@ function AnnouncementBanner({ announcement }: { announcement: any }) {
   );
 }
 
+// ── Blog Card ──────────────────────────────────────────────────────────────
+function BlogCard({ post, idx }: { post: any; idx: number }) {
+  const categoryColors: Record<string, string> = {
+    Update: "bg-blue-50 text-blue-700 border-blue-100",
+    Tips:   "bg-emerald-50 text-emerald-700 border-emerald-100",
+    News:   "bg-amber-50 text-amber-700 border-amber-100",
+    Guide:  "bg-violet-50 text-violet-700 border-violet-100",
+  };
+  const color = categoryColors[post.category] ?? "bg-slate-50 text-slate-700 border-slate-100";
+
+  return (
+    <motion.div
+      {...fadeUp(0.1 * idx)}
+      className="bg-white border border-slate-200 rounded-3xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${color} flex items-center gap-1.5`}>
+          <Tag className="w-3 h-3" />{post.category}
+        </span>
+        <span className="text-xs text-slate-400 flex items-center gap-1.5">
+          <CalendarDays className="w-3 h-3" />
+          {new Date(post.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+        </span>
+      </div>
+      <h3 className="font-bold text-slate-900 text-lg leading-tight mb-3 group-hover:text-primary-600 transition-colors flex-1">
+        {post.title}
+      </h3>
+      <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">{post.summary}</p>
+      <div className="mt-5 pt-4 border-t border-slate-100">
+        <Link href="/register" className="text-sm font-bold text-primary-600 hover:text-primary-500 flex items-center gap-1.5 transition-colors">
+          Read More <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────
 export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
   const [categories, setCategories] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
-  // Only categories are fetched client-side (they change often and are personalized)
   useEffect(() => {
     fetch("/api/categories")
       .then(r => r.json())
@@ -87,22 +128,33 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
       .finally(() => setLoadingCategories(false));
   }, []);
 
-  const hero = cms.hero ?? {};
-  const stats: any[] = cms.stats ?? [];
-  const features: any[] = cms.features ?? [];
-  const testimonials: any[] = cms.testimonials ?? [];
+  const hero         = cms.hero         ?? {};
+  const stats        = (cms.stats        ?? []) as any[];
+  const features     = (cms.features     ?? []) as any[];
+  const testimonials = (cms.testimonials ?? []) as any[];
   const announcement = cms.announcement;
+  const sections     = cms.sections      ?? {};
+  const blog         = (cms.blog         ?? []).filter((p: any) => p.published) as any[];
+
+  const show = {
+    stats:        sections.showStats        !== false,
+    categories:   sections.showCategories   !== false,
+    howItWorks:   sections.showHowItWorks   !== false,
+    features:     sections.showFeatures     !== false,
+    testimonials: sections.showTestimonials !== false,
+    blog:         sections.showBlog         !== false,
+  };
 
   const getTextColor = (colorStr: string) => {
     if (!colorStr) return 'text-slate-500';
-    if (colorStr.includes('primary')) return 'text-primary-500';
-    if (colorStr.includes('rose')) return 'text-rose-500';
-    if (colorStr.includes('emerald')) return 'text-emerald-500';
-    if (colorStr.includes('amber')) return 'text-amber-500';
-    if (colorStr.includes('indigo')) return 'text-indigo-500';
-    if (colorStr.includes('teal')) return 'text-teal-500';
-    if (colorStr.includes('sky')) return 'text-sky-500';
-    if (colorStr.includes('blue')) return 'text-blue-500';
+    if (colorStr.includes('primary'))  return 'text-primary-500';
+    if (colorStr.includes('rose'))     return 'text-rose-500';
+    if (colorStr.includes('emerald'))  return 'text-emerald-500';
+    if (colorStr.includes('amber'))    return 'text-amber-500';
+    if (colorStr.includes('indigo'))   return 'text-indigo-500';
+    if (colorStr.includes('teal'))     return 'text-teal-500';
+    if (colorStr.includes('sky'))      return 'text-sky-500';
+    if (colorStr.includes('blue'))     return 'text-blue-500';
     return 'text-slate-500';
   };
 
@@ -112,7 +164,7 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
         <Navbar />
         <AnnouncementBanner announcement={announcement} />
 
-        {/* ─── HERO SECTION ─── */}
+        {/* ─── HERO ─── */}
         <section className="w-full relative pt-36 pb-24 px-4 overflow-hidden">
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             <div className="absolute inset-0 bg-[url('/medical-bg.png')] bg-cover bg-center bg-no-repeat opacity-50" />
@@ -143,7 +195,7 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
             <motion.p
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
               className="mt-6 text-lg md:text-xl text-slate-600 max-w-3xl leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: hero.subtext || "Join <strong>5,000+ medical students</strong> who practice daily on our platform." }}
+              dangerouslySetInnerHTML={{ __html: hero.subtext || "Join <strong>5,000+ medical students</strong> practicing daily." }}
             />
 
             <motion.div
@@ -170,8 +222,8 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
           </div>
         </section>
 
-        {/* ─── STATS BAR ─── */}
-        {stats.length > 0 && (
+        {/* ─── STATS ─── */}
+        {show.stats && stats.length > 0 && (
           <section className="w-full max-w-6xl mx-auto px-4 -mt-2 mb-20 relative z-10">
             <motion.div {...fadeUp()} className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {stats.map((s, i) => (
@@ -185,69 +237,72 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
         )}
 
         {/* ─── CATEGORIES ─── */}
-        <section className="w-full max-w-6xl mx-auto px-4 mb-24">
-          <motion.div {...fadeUp()} className="text-center mb-10">
-            <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-2">Exam Categories</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Pick Your Stream</h2>
-            <p className="text-slate-500 mt-3 max-w-xl mx-auto">Whether you&apos;re in Nursing, MBBS, Pharmacy or BDS — we have the right question bank for you.</p>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {loadingCategories ? (
-              [...Array(4)].map((_, idx) => (
-                <div key={idx} className="border-2 border-slate-200 rounded-2xl p-6 flex flex-col items-center gap-4 text-center bg-white animate-pulse">
-                  <div className="w-12 h-12 rounded-xl bg-slate-200" />
-                  <div className="w-20 h-4 bg-slate-200 rounded mt-2" />
-                  <div className="w-24 h-3 bg-slate-100 rounded mt-1" />
-                </div>
-              ))
-            ) : (
-              categories.map((cat, idx) => (
-                <motion.div key={cat.name} {...fadeUp(0.08 * idx)}>
-                  <Link href="/register">
-                    <div className={`group border-2 ${cat.color || 'bg-slate-50 border-slate-200'} rounded-2xl p-6 flex flex-col items-center gap-4 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all bg-white`}>
-                      <div className="p-3 rounded-xl bg-white shadow-sm group-hover:scale-110 transition-transform">
-                        <CategoryIcon name={cat.icon} className={`w-7 h-7 ${getTextColor(cat.color || '')}`} />
+        {show.categories && (
+          <section className="w-full max-w-6xl mx-auto px-4 mb-24">
+            <motion.div {...fadeUp()} className="text-center mb-10">
+              <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-2">Exam Categories</p>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Pick Your Stream</h2>
+              <p className="text-slate-500 mt-3 max-w-xl mx-auto">Whether you&apos;re in Nursing, MBBS, Pharmacy or BDS — we have the right question bank for you.</p>
+            </motion.div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              {loadingCategories ? (
+                [...Array(4)].map((_, idx) => (
+                  <div key={idx} className="border-2 border-slate-200 rounded-2xl p-6 flex flex-col items-center gap-4 bg-white animate-pulse">
+                    <div className="w-12 h-12 rounded-xl bg-slate-200" />
+                    <div className="w-20 h-4 bg-slate-200 rounded" />
+                  </div>
+                ))
+              ) : (
+                categories.map((cat, idx) => (
+                  <motion.div key={cat.name} {...fadeUp(0.08 * idx)}>
+                    <Link href="/register">
+                      <div className={`group border-2 ${cat.color || 'bg-slate-50 border-slate-200'} rounded-2xl p-6 flex flex-col items-center gap-4 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all bg-white`}>
+                        <div className="p-3 rounded-xl bg-white shadow-sm group-hover:scale-110 transition-transform">
+                          <CategoryIcon name={cat.icon} className={`w-7 h-7 ${getTextColor(cat.color || '')}`} />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900">{cat.name}</h3>
+                          <p className="text-xs text-slate-500 mt-1">{cat.description || 'Practice Questions'}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-base font-bold text-slate-900">{cat.name}</h3>
-                        <p className="text-xs text-slate-500 mt-1">{cat.description || 'Practice Questions'}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))
-            )}
-          </div>
-        </section>
+                    </Link>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ─── HOW IT WORKS ─── */}
-        <section className="w-full bg-white border-y border-slate-200 py-24 px-4">
-          <div className="max-w-6xl mx-auto">
-            <motion.div {...fadeUp()} className="text-center mb-14">
-              <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-2">Simple Process</p>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">How It Works</h2>
-              <p className="text-slate-500 mt-3 max-w-xl mx-auto">Getting started takes less than a minute. Zero confusion, pure learning.</p>
-            </motion.div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              <div className="hidden md:block absolute top-14 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-primary-200 to-emerald-200" />
-              {[
-                { step: "01", icon: <LogIn className="w-6 h-6 text-primary-600" />, title: "Sign Up for Free", desc: "Create your account in under 30 seconds. No credit card required. Instant access to all free practice tests.", color: "bg-primary-50 border-primary-100" },
-                { step: "02", icon: <Target className="w-6 h-6 text-emerald-600" />, title: "Pick Your Subject", desc: "Choose from MBBS, Nursing, Pharmacy, BDS, and Paramedical exams. We have daily updated question banks.", color: "bg-emerald-50 border-emerald-100" },
-                { step: "03", icon: <BarChart3 className="w-6 h-6 text-amber-600" />, title: "Track & Improve", desc: "Get detailed analytics after every test. Our AI identifies your weak points so you improve faster each day.", color: "bg-amber-50 border-amber-100" },
-              ].map((step, i) => (
-                <motion.div key={i} {...fadeUp(0.15 * i)} className={`relative border-2 ${step.color} rounded-3xl p-8 text-center`}>
-                  <span className="text-6xl font-black text-slate-100 absolute top-4 right-5 leading-none">{step.step}</span>
-                  <div className="w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-5 mx-auto">{step.icon}</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">{step.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{step.desc}</p>
-                </motion.div>
-              ))}
+        {show.howItWorks && (
+          <section className="w-full bg-white border-y border-slate-200 py-24 px-4">
+            <div className="max-w-6xl mx-auto">
+              <motion.div {...fadeUp()} className="text-center mb-14">
+                <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-2">Simple Process</p>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">How It Works</h2>
+                <p className="text-slate-500 mt-3 max-w-xl mx-auto">Getting started takes less than a minute. Zero confusion, pure learning.</p>
+              </motion.div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                <div className="hidden md:block absolute top-14 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-primary-200 to-emerald-200" />
+                {[
+                  { step: "01", icon: <LogIn className="w-6 h-6 text-primary-600" />, title: "Sign Up for Free", desc: "Create your account in under 30 seconds. No credit card required. Instant access to all free practice tests.", color: "bg-primary-50 border-primary-100" },
+                  { step: "02", icon: <Target className="w-6 h-6 text-emerald-600" />, title: "Pick Your Subject", desc: "Choose from MBBS, Nursing, Pharmacy, BDS, and Paramedical exams. We have daily updated question banks.", color: "bg-emerald-50 border-emerald-100" },
+                  { step: "03", icon: <BarChart3 className="w-6 h-6 text-amber-600" />, title: "Track & Improve", desc: "Get detailed analytics after every test. Our AI identifies your weak points so you improve faster each day.", color: "bg-amber-50 border-amber-100" },
+                ].map((step, i) => (
+                  <motion.div key={i} {...fadeUp(0.15 * i)} className={`relative border-2 ${step.color} rounded-3xl p-8 text-center`}>
+                    <span className="text-6xl font-black text-slate-100 absolute top-4 right-5 leading-none">{step.step}</span>
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center mb-5 mx-auto">{step.icon}</div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3">{step.title}</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed">{step.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ─── FEATURES GRID ─── */}
-        {features.length > 0 && (
+        {/* ─── FEATURES ─── */}
+        {show.features && features.length > 0 && (
           <section className="w-full max-w-6xl mx-auto px-4 py-24">
             <motion.div {...fadeUp()} className="text-center mb-14">
               <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-2">Platform Features</p>
@@ -272,7 +327,7 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
         )}
 
         {/* ─── TESTIMONIALS ─── */}
-        {testimonials.length > 0 && (
+        {show.testimonials && testimonials.length > 0 && (
           <section className="w-full bg-white border-y border-slate-200 py-24 px-4">
             <div className="max-w-6xl mx-auto">
               <motion.div {...fadeUp()} className="text-center mb-14">
@@ -303,6 +358,24 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
           </section>
         )}
 
+        {/* ─── BLOG / NEWS ─── */}
+        {show.blog && blog.length > 0 && (
+          <section className="w-full max-w-6xl mx-auto px-4 py-24">
+            <motion.div {...fadeUp()} className="flex items-end justify-between mb-12 flex-wrap gap-4">
+              <div>
+                <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <Newspaper className="w-3.5 h-3.5" /> Latest Updates
+                </p>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">News & Study Tips</h2>
+                <p className="text-slate-500 mt-2">Stay updated with new questions, tips, and platform news.</p>
+              </div>
+            </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blog.map((post, i) => <BlogCard key={post.id ?? i} post={post} idx={i} />)}
+            </div>
+          </section>
+        )}
+
         {/* ─── LIVE EXAM PREVIEW ─── */}
         <section className="w-full max-w-7xl mx-auto px-4 py-24">
           <div className="flex flex-col lg:flex-row gap-14 items-center">
@@ -310,26 +383,23 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
               <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-3">Live Platform Preview</p>
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-5">
                 A Test Interface Built for{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-500">
-                  Real Exam Confidence
-                </span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-500">Real Exam Confidence</span>
               </h2>
               <p className="text-slate-600 text-lg mb-8 leading-relaxed">
                 No distractions, no clutter. Our clean interface mimics the real exam environment so you are never caught off guard on exam day.
               </p>
               <ul className="space-y-3">
-                {["Timer countdown with auto-submit", "Question palette for quick navigation", "Instant result & detailed explanation", "Accuracy & time-per-question breakdown"].map((item) => (
+                {["Timer countdown with auto-submit", "Question palette for quick navigation", "Instant result & detailed explanation", "Accuracy & time-per-question breakdown"].map(item => (
                   <li key={item} className="flex items-center gap-3 text-slate-700 font-medium">
                     <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" /> {item}
                   </li>
                 ))}
               </ul>
               <div className="mt-8">
-                <Link href="/register">
-                  <Button variant="primary" size="lg">Try a Free Test Now <ArrowRight className="w-5 h-5" /></Button>
-                </Link>
+                <Link href="/register"><Button variant="primary" size="lg">Try a Free Test Now <ArrowRight className="w-5 h-5" /></Button></Link>
               </div>
             </motion.div>
+
             <motion.div
               initial={{ opacity: 0, scale: 0.92 }} whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }} transition={{ duration: 0.7 }}
@@ -363,23 +433,21 @@ export default function HomepageClient({ cms }: { cms: Record<string, any> }) {
           </div>
         </section>
 
-        {/* ─── FINAL CTA ─── */}
+        {/* ─── CTA ─── */}
         <section className="w-full px-4 pb-24">
-          <motion.div {...fadeUp()} className="max-w-4xl mx-auto rounded-3xl overflow-hidden relative text-center" style={{ background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a21caf 100%)" }}>
+          <motion.div
+            {...fadeUp()}
+            className="max-w-4xl mx-auto rounded-3xl overflow-hidden relative text-center"
+            style={{ background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a21caf 100%)" }}
+          >
             <div className="absolute inset-0 bg-[url('/medical-bg.png')] bg-cover opacity-10" />
             <div className="relative px-8 py-16">
-              <span className="inline-block bg-white/20 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-5 uppercase tracking-widest">
-                🎯 Limited Time — Join Free Today
-              </span>
+              <span className="inline-block bg-white/20 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-5 uppercase tracking-widest">🎯 Limited Time — Join Free Today</span>
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-5 leading-tight">Your Exam is Waiting.<br />Are You Ready?</h2>
               <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">Every topper had a strategy. Yours starts here. Sign up now and take your first test in under 2 minutes.</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/register">
-                  <button className="px-8 py-4 bg-white text-indigo-700 font-extrabold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-base">Create Free Account →</button>
-                </Link>
-                <Link href="/login">
-                  <button className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 transition-all text-base">Sign In Instead</button>
-                </Link>
+                <Link href="/register"><button className="px-8 py-4 bg-white text-indigo-700 font-extrabold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-base">Create Free Account →</button></Link>
+                <Link href="/login"><button className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-2xl hover:bg-white/20 transition-all text-base">Sign In Instead</button></Link>
               </div>
               <p className="text-white/50 text-sm mt-6">No credit card • Takes 30 seconds • 5,000+ students already inside</p>
             </div>

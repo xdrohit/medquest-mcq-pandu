@@ -6,18 +6,22 @@ import {
   Save, Plus, Trash2, CheckCircle, AlertCircle, Loader2,
   Megaphone, LayoutTemplate, BarChart3, Star, Sparkles, Info,
   Settings, HelpCircle, Globe, ChevronDown, ChevronUp, Eye, EyeOff,
-  RefreshCw, Monitor
+  Monitor, Newspaper, LayoutGrid, Palette as Palette2, CalendarDays,
+  Type, Image as ImageIcon, ToggleLeft, ToggleRight
 } from "lucide-react";
 
 const TABS = [
   { key: "announcement", label: "📢 Announcement", icon: Megaphone },
-  { key: "hero", label: "🏠 Hero Section", icon: LayoutTemplate },
-  { key: "stats", label: "📊 Stats Bar", icon: BarChart3 },
-  { key: "features", label: "✨ Features Grid", icon: Sparkles },
-  { key: "testimonials", label: "💬 Testimonials", icon: Star },
-  { key: "about", label: "ℹ️ About Page", icon: Info },
-  { key: "faq", label: "❓ FAQ", icon: HelpCircle },
-  { key: "settings", label: "⚙️ Site Settings", icon: Settings },
+  { key: "hero",         label: "🏠 Hero Section",  icon: LayoutTemplate },
+  { key: "stats",        label: "📊 Stats Bar",     icon: BarChart3 },
+  { key: "features",     label: "✨ Features Grid", icon: Sparkles },
+  { key: "testimonials", label: "💬 Testimonials",  icon: Star },
+  { key: "about",        label: "ℹ️ About Page",   icon: Info },
+  { key: "faq",          label: "❓ FAQ",           icon: HelpCircle },
+  { key: "blog",         label: "📰 Blog / News",   icon: Newspaper },
+  { key: "sections",     label: "🔲 Section Visibility", icon: LayoutGrid },
+  { key: "brand",        label: "🎨 Brand & Logo",  icon: Palette2 },
+  { key: "settings",     label: "⚙️ Site Settings", icon: Settings },
 ];
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -160,6 +164,9 @@ export default function CMSPage() {
               {activeTab === "testimonials" && <TestimonialsEditor data={content.testimonials} onChange={d => updateSection("testimonials", d)} />}
               {activeTab === "about" && <AboutEditor data={content.about} onChange={d => updateSection("about", d)} />}
               {activeTab === "faq" && <FaqEditor data={content.faq} onChange={d => updateSection("faq", d)} />}
+              {activeTab === "blog" && <BlogEditor data={content.blog} onChange={d => updateSection("blog", d)} />}
+              {activeTab === "sections" && <SectionsEditor data={content.sections} onChange={d => updateSection("sections", d)} />}
+              {activeTab === "brand" && <BrandEditor data={content.brand} onChange={d => updateSection("brand", d)} />}
               {activeTab === "settings" && <SettingsEditor data={content.settings} onChange={d => updateSection("settings", d)} />}
             </motion.div>
           </AnimatePresence>
@@ -434,3 +441,182 @@ function SettingsEditor({ data, onChange }: { data: any; onChange: (d: any) => v
     </div>
   );
 }
+
+// ─── Blog Editor ──────────────────────────────────────────────────────────────
+function BlogEditor({ data, onChange }: { data: any; onChange: (d: any) => void }) {
+  const posts = Array.isArray(data) ? data : [];
+  const update = (i: number, field: string, val: any) =>
+    onChange(posts.map((p, idx) => idx === i ? { ...p, [field]: val } : p));
+  const remove = (i: number) => onChange(posts.filter((_, idx) => idx !== i));
+  const add = () => onChange([...posts, {
+    id: Date.now().toString(),
+    title: "New Post Title",
+    summary: "Short description of this post...",
+    category: "Update",
+    date: new Date().toISOString().split("T")[0],
+    published: false,
+  }]);
+
+  const CATEGORIES = ["Update", "Tips", "News", "Guide"];
+
+  return (
+    <div>
+      <SectionTitle>📰 Blog / News Section</SectionTitle>
+      <p className="text-sm text-slate-500 mb-6">Add news posts and study tips that appear on the homepage. Toggle each post on/off without deleting it.</p>
+      {posts.map((p, i) => (
+        <ItemCard key={p.id ?? i} onDelete={() => remove(i)}>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Post #{i + 1}</span>
+            <button
+              onClick={() => update(i, "published", !p.published)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-2 ${p.published ? "border-emerald-400 bg-emerald-50 text-emerald-600" : "border-slate-200 text-slate-400 hover:border-pink-300"}`}
+            >
+              {p.published ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+              {p.published ? "Published ✅" : "Draft 📝"}
+            </button>
+          </div>
+          <Field label="Post Title"><Input value={p.title} onChange={(v: string) => update(i, "title", v)} /></Field>
+          <Field label="Summary (shown on homepage)"><Input multiline value={p.summary} onChange={(v: string) => update(i, "summary", v)} /></Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Category">
+              <div className="flex gap-2 flex-wrap">
+                {CATEGORIES.map(cat => (
+                  <button key={cat} onClick={() => update(i, "category", cat)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${p.category === cat ? "border-pink-400 bg-pink-50 text-pink-600" : "border-slate-200 text-slate-400 hover:border-pink-200"}`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            <Field label="Date">
+              <input type="date" value={p.date ?? ""} onChange={e => update(i, "date", e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-pink-400 transition-colors" />
+            </Field>
+          </div>
+        </ItemCard>
+      ))}
+      <AddButton onClick={add} label="Add New Post" />
+    </div>
+  );
+}
+
+// ─── Sections Visibility Editor ───────────────────────────────────────────────
+function SectionsEditor({ data, onChange }: { data: any; onChange: (d: any) => void }) {
+  const d = data ?? {};
+  const set = (k: string, v: boolean) => onChange({ ...d, [k]: v });
+
+  const SECTION_LIST = [
+    { key: "showStats",        label: "📊 Stats Bar",          desc: "Numbers like '5,000+ Students', '3,100+ MCQs'" },
+    { key: "showCategories",   label: "🎓 Exam Categories",    desc: "The 'Pick Your Stream' grid of departments" },
+    { key: "showHowItWorks",   label: "🔢 How It Works",       desc: "The 3-step process section" },
+    { key: "showFeatures",     label: "✨ Features Grid",      desc: "The 6 platform feature cards" },
+    { key: "showTestimonials", label: "💬 Testimonials",       desc: "Student reviews and ratings" },
+    { key: "showBlog",         label: "📰 Blog / News",        desc: "News posts and study tips section" },
+  ];
+
+  return (
+    <div>
+      <SectionTitle>🔲 Section Visibility</SectionTitle>
+      <p className="text-sm text-slate-500 mb-6">Toggle entire homepage sections on or off instantly. Changes take effect within 60 seconds on the live site.</p>
+      <div className="space-y-3">
+        {SECTION_LIST.map(({ key, label, desc }) => {
+          const isOn = d[key] !== false;
+          return (
+            <button
+              key={key}
+              onClick={() => set(key, !isOn)}
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left ${isOn ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20" : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30 opacity-70"}`}
+            >
+              <div>
+                <p className={`font-bold text-sm ${isOn ? "text-emerald-800 dark:text-emerald-300" : "text-slate-500"}`}>{label}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+              </div>
+              <div className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-black ${isOn ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "bg-slate-200 dark:bg-slate-700 text-slate-500"}`}>
+                {isOn ? <><Eye className="w-3.5 h-3.5" /> Visible</> : <><EyeOff className="w-3.5 h-3.5" /> Hidden</>}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Brand Editor ─────────────────────────────────────────────────────────────
+function BrandEditor({ data, onChange }: { data: any; onChange: (d: any) => void }) {
+  const d = data ?? {};
+  const set = (k: string, v: any) => onChange({ ...d, [k]: v });
+
+  return (
+    <div>
+      <SectionTitle>🎨 Brand & Logo Settings</SectionTitle>
+      <p className="text-sm text-slate-500 mb-6">Customize your site&apos;s identity. Changes to brand colors affect the whole site.</p>
+
+      <div className="grid md:grid-cols-2 gap-x-6">
+        <Field label="Site Logo Text" hint="Shown in the navbar and footer">
+          <Input value={d.logoText} onChange={(v: string) => set("logoText", v)} placeholder="Daily Dose MCQ" />
+        </Field>
+        <Field label="Logo Emoji / Icon" hint="Emoji shown next to the logo text">
+          <Input value={d.logoEmoji} onChange={(v: string) => set("logoEmoji", v)} placeholder="🩺" />
+        </Field>
+      </div>
+
+      <div className="mt-2 mb-6">
+        <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Palette2 className="w-3.5 h-3.5" /> Theme Colors
+        </div>
+        <p className="text-xs text-slate-400 mb-4">⚠️ Note: Color picker sets CSS variable overrides. For best results, use hex colors. Full color system changes require a redeployment.</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3">Primary Color</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={d.primaryColor ?? "#6366f1"}
+                onChange={e => set("primaryColor", e.target.value)}
+                className="w-12 h-12 rounded-xl border-2 border-slate-200 cursor-pointer p-0.5 bg-white"
+              />
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{d.primaryColor ?? "#6366f1"}</p>
+                <p className="text-xs text-slate-400">Used for buttons, links, badges</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3">Accent Color</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={d.accentColor ?? "#a855f7"}
+                onChange={e => set("accentColor", e.target.value)}
+                className="w-12 h-12 rounded-xl border-2 border-slate-200 cursor-pointer p-0.5 bg-white"
+              />
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{d.accentColor ?? "#a855f7"}</p>
+                <p className="text-xs text-slate-400">Used for gradients and highlights</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Preview */}
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Live Preview</p>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: `linear-gradient(135deg, ${d.primaryColor ?? "#6366f1"}, ${d.accentColor ?? "#a855f7"})` }}>
+            {d.logoEmoji ?? "🩺"}
+          </div>
+          <span className="font-black text-lg text-slate-900 dark:text-white">{d.logoText ?? "Daily Dose MCQ"}</span>
+        </div>
+        <button
+          style={{ background: `linear-gradient(135deg, ${d.primaryColor ?? "#6366f1"}, ${d.accentColor ?? "#a855f7"})` }}
+          className="px-5 py-2 rounded-xl text-white text-sm font-bold shadow-lg"
+        >
+          Sample Button →
+        </button>
+      </div>
+    </div>
+  );
+}
+

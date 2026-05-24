@@ -1,21 +1,9 @@
-// Server Component with ISR
-import { DEFAULT_CONTENT } from "@/app/api/site-content/route";
+import { getCmsSection } from "@/lib/cms";
 import AboutClient from "@/components/about/AboutClient";
 
-async function getAboutData() {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/site-content?section=about`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return DEFAULT_CONTENT.about;
-    return res.json();
-  } catch {
-    return DEFAULT_CONTENT.about;
-  }
-}
+export const revalidate = 60;
 
 export default async function AboutUsPage() {
-  const about = await getAboutData();
+  const about = await getCmsSection("about");
   return <AboutClient about={about} />;
 }

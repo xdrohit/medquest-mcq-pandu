@@ -68,6 +68,39 @@ export const DEFAULT_CONTENT: Record<string, any> = {
     { question: "Can I track my progress?", answer: "Absolutely! Our analytics dashboard shows your score history, accuracy rates, topic-wise weaknesses, and average time per question." },
     { question: "How many questions are in the bank?", answer: "We have 3,100+ verified MCQs and add new questions every week based on the latest exam patterns." },
   ],
+  sections: {
+    showStats: true,
+    showHowItWorks: true,
+    showFeatures: true,
+    showTestimonials: true,
+    showBlog: true,
+    showCategories: true,
+  },
+  brand: {
+    logoText: "Daily Dose MCQ",
+    logoEmoji: "🩺",
+    primaryColor: "#6366f1",
+    accentColor: "#a855f7",
+    favicon: "",
+  },
+  blog: [
+    {
+      id: "1",
+      title: "New AIIMS Pattern MCQs Added! 🎯",
+      summary: "We've added 200+ brand new MCQs following the latest AIIMS exam pattern. Cover topics like Anatomy, Physiology, and Biochemistry.",
+      category: "Update",
+      date: "2025-05-20",
+      published: true,
+    },
+    {
+      id: "2",
+      title: "Top 5 Tips to Score 90%+ in MBBS Exams 📚",
+      summary: "Our expert team has compiled the top strategies that helped thousands of students crack their medical exams with high scores.",
+      category: "Tips",
+      date: "2025-05-15",
+      published: true,
+    },
+  ],
 };
 
 // ── GET: Public — return all content or a specific section ──────────────────

@@ -1,23 +1,13 @@
-// ── Server Component: fetches CMS data at build time + ISR revalidation every 60s
-// Zero client-side delay for content — it's all pre-rendered on the server.
+// ── Server Component: fetches CMS data directly from DB (no HTTP round-trip)
+// Eliminates production error of server fetching its own API
+// ISR: Next.js caches this page for 60s, then re-fetches in background
 import React from "react";
-import { DEFAULT_CONTENT } from "@/app/api/site-content/route";
+import { getCmsContent } from "@/lib/cms";
 import HomepageClient from "@/components/homepage/HomepageClient";
 
-async function getCmsData() {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/site-content`, {
-      next: { revalidate: 60 }, // ISR: re-fetch every 60s on the server
-    });
-    if (!res.ok) return DEFAULT_CONTENT;
-    return res.json();
-  } catch {
-    return DEFAULT_CONTENT;
-  }
-}
+export const revalidate = 60; // ISR: revalidate every 60 seconds
 
 export default async function HomePage() {
-  const cms = await getCmsData();
+  const cms = await getCmsContent();
   return <HomepageClient cms={cms} />;
 }
